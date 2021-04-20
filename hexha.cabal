@@ -1,0 +1,37 @@
+cabal-version:       >= 2.0
+name:                hexha
+version:             0.1.0.0
+-- synopsis:
+-- description:
+-- bug-reports:
+-- license:
+license-file:        LICENSE
+author:              madjestic
+maintainer:          madjestic13@gmail.com
+-- copyright:
+-- category:
+build-type:          Simple
+extra-source-files:  CHANGELOG.md, README.md
+
+executable hexha
+  ghc-options:        -threaded -Wall -Wcompat -O2           
+  main-is:             Main.hs
+  -- other-modules:
+  -- other-extensions:
+  build-depends:       base           ^>= 4.14
+                     , bytestring     ^>= 0.10.12.1
+                     , cassava        ^>= 0.5.2.0
+                     , coinbase-pro   ^>= 0.9.2.0
+                     , parallel       ^>= 3.2.2.0
+                     , massiv         ^>= 0.6.0.0
+                     , brick
+                     , vty
+                     , text
+                     , microlens      ^>= 0.4.12.0
+                     , vector         
+                     , asciichart     ^>= 1.0.2
+                     , raw-strings-qq ^>= 1.1
+ 
+                     
+  -- hs-source-dirs:
+  default-language:    Haskell2010

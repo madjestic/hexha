@@ -1,2 +1,2 @@
 # hexha
-like ponzi2, but in haskell
+~~like ponzi2~~ like cointop, but in haskell
