@@ -53,6 +53,20 @@ test1Output = tail [r|
 -5.00 ┤                                        ╰────────╯
 |]
 
+test2Output :: String
+test2Output = tail [r|
+ 5.00 ┤                        ╭────────╮
+ 3.75 ┤                     ╭──╯        ╰──╮
+ 2.50 ┤                ╭────╯              ╰────╮
+ 1.25 ┤              ╭─╯                        ╰─╮
+ 0.00 ┼              |                            ╰╮              
+-1.25 ┤            ╭─╯                             ╰─╮            
+-2.50 ┤       ╭────╯                                 ╰────╮       
+-3.75 ┤    ╭──╯                                           ╰──╮    
+-5.00 ┤────╯                                                 ╰─────
+|]
+  
+
 
 --drawUI :: (Show a) => L.List () a -> [Widget ()]
 drawUI :: L.List () String -> [Widget ()]
@@ -60,19 +74,30 @@ drawUI l = [ui]
     where
         --lbl = str "Item " <+> cur <+> str " of " <+> total
         lbl = cur
-        cur = case l^.(L.listSelectedL) of
-                Nothing -> str "-"
-                Just i -> str $ (listElements l)Vec.!i --str (show (i + 1))
+        cur
+          = case l^.(L.listSelectedL) of
+              Nothing -> str "-"
+              Just i -> str $ (listElements l)Vec.!i --str (show (i + 1))
         -- total = str $ show $ Vec.length $ l^.(L.listElementsL)
-        graph = B.borderWithLabel lbl $
-              hLimit 80 $
-              vLimit 15 $
-              str test1Output
+        sel
+          = case l^.(L.listSelectedL) of
+              Nothing -> 0
+              Just i  -> i
+        fs =
+          [ test1Output
+          , test2Output ]
+        graph
+          = B.borderWithLabel lbl $
+            hLimit 80 $
+            vLimit 15 $
+            --str test1Output
+            str $ fs!!(sel `mod` length fs)
 
-        box = B.borderWithLabel lbl $
-              hLimit 67 $
-              vLimit 15 $
-              L.renderList listDrawElement True l
+        box
+          = B.borderWithLabel lbl $
+            hLimit 67 $
+            vLimit 15 $
+            L.renderList listDrawElement True l
         ui = C.vCenter $ vBox [
                                 C.hCenter graph
                               , C.hCenter box
@@ -80,12 +105,6 @@ drawUI l = [ui]
                               , C.hCenter $ str "Press +/- to add/remove list elements."
                               , C.hCenter $ str "Press Esc to exit."
                               ]
-drawGraph :: Widget Name
-drawGraph = withBorderStyle BS.unicodeBold
-  $ B.borderWithLabel (str "Sin")
-  $ C.hCenter
-  $ padAll 1
-  $ str test0Output
 
 appEvent :: L.List () String -> T.BrickEvent () e -> T.EventM () (T.Next (L.List () String))
 appEvent l (T.VtyEvent e) =
@@ -120,7 +139,9 @@ initialState :: L.List () String
 initialState = L.list () (Vec.fromList
                           [ "Bitcoin"
                           , "Ethereum"
-                          , "Litecoin"]) 1
+                          , "Litecoin"
+                          , "DogCoin"
+                          ]) 1
 
 customAttr :: A.AttrName
 customAttr = L.listSelectedAttr <> "custom"
@@ -143,3 +164,4 @@ theApp =
 
 main :: IO ()
 main = void $ M.defaultMain theApp initialState
+
