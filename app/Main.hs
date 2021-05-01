@@ -5,12 +5,8 @@ module Main where
 
 import Lens.Micro ((^.))
 import Control.Monad (void)
-
-
-
 import Data.Maybe (fromMaybe)
 import qualified Graphics.Vty as V
-
 import Brick ( App(..)
              , withBorderStyle
              , padRight, padLeft, padTop, padAll, Padding(..))
@@ -25,10 +21,75 @@ import qualified Data.Vector as Vec
 import Brick.Types ( Widget )
 import Brick.Widgets.Core ( (<+>), str, vLimit, hLimit, vBox, withAttr )
 import Brick.Util (fg, on)
-
 import Text.RawString.QQ
 
+import Data.Aeson
+import Data.Aeson.Types (parse)
+import Network.HTTP.Conduit
+import Control.Exception
+import qualified Data.ByteString.Lazy.Char8 as L8
+import Net.Stocks
+import qualified Net.IEX.TimeSeries         as IEXTimeSeries
+
+import Debug.Trace    as DT
+
 type Name = ()
+
+---------------------------------------------------------------------------------------------------------------------------------------------------------------
+--- iexcloud --------------------------------------------------------------------------------------------------------------------------------------------------
+
+type AuthAndSymbol = (String, Symbol)
+type Symbol = String
+
+getNonJSONData :: String -> IO (Either SomeException L8.ByteString)
+getNonJSONData query = try $ simpleHttp query
+
+test' :: IO (Maybe [IEXTimeSeries.TimeSeries])
+test' =
+  do
+    -- obj <- getNonJSONData "https://sandbox.iexapis.com/stable/time-series/REPORTED_FINANCIALS/AAPL/10-Q?from=2018-01-01&to=2019-06-01&token=Tpk_8d1fbeccf06745019a98635b05346b90"
+    obj <- getNonJSONData "https://sandbox.iexapis.com/stable/tops?symbols=aapl&token=Tpk_8d1fbeccf06745019a98635b05346b90"
+    putStrLn $ show obj
+    -- case (DT.trace ("obj :" ++ show obj) $ obj) of
+    case obj of
+      Left _ ->
+        return Nothing
+      Right bytestr ->
+        return $ decode bytestr
+
+getTS'' :: AuthAndSymbol -> QSParms -> IO (Maybe [IEXTimeSeries.TimeSeries])
+-- getTS'' (auth, symb) parms = do
+getTS'' _ _ = do
+  obj <- getNonJSONData "https://sandbox.iexapis.com/stable/time-series/REPORTED_FINANCIALS/AAPL/10-Q?from=2018-01-01&to=2019-06-01&token=Tpk_8d1fbeccf06745019a98635b05346b90"
+         -- baseURL
+         -- ++ "/time-series/REPORTED_FINANCIALS/"
+         -- ++ symb
+         -- ++ "/10-Q"
+         -- ++ "?"
+         -- ++ "from=2018-01-01&to=2019-06-01"
+         -- ++ tokenize' auth
+  case obj of
+    Left _ ->
+      return Nothing
+    Right bytestr ->
+      return $ decode bytestr
+
+
+parms = QSParms 0 0
+symb  = "AAPL"
+token = "Tpk_8d1fbeccf06745019a98635b05346b90"
+query = "https://sandbox.iexapis.com/stable/time-series/REPORTED_FINANCIALS/AAPL/10-Q?from=2018-01-01&to=2019-06-01&token=Tpk_8d1fbeccf06745019a98635b05346b90"
+
+test =
+  do
+    x <- getTS'' (token, symb) parms
+    print $ length x
+
+---------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+fromJust :: Monoid a => Maybe a -> a
+fromJust (Just x) = x
+fromJust Nothing  = mempty
 
 test0Output :: String
 test0Output = tail [r|
@@ -65,7 +126,7 @@ test2Output = tail [r|
 -3.75 ┤    ╭──╯                                           ╰──╮    
 -5.00 ┤────╯                                                 ╰─────
 |]
-  
+
 
 
 --drawUI :: (Show a) => L.List () a -> [Widget ()]
@@ -140,7 +201,7 @@ initialState = L.list () (Vec.fromList
                           [ "Bitcoin"
                           , "Ethereum"
                           , "Litecoin"
-                          , "DogCoin"
+                          , "DogeCoin"
                           ]) 1
 
 customAttr :: A.AttrName
@@ -164,4 +225,15 @@ theApp =
 
 main :: IO ()
 main = void $ M.defaultMain theApp initialState
+
+-- obj <- getNonJSONData "https://sandbox.iexapis.com/stable/tops?symbols=aapl&token=Tpk_8d1fbeccf06745019a98635b05346b90"
+-- Right "[{\"symbol\":\"AAPL\",\"sector\":\"nhycottelongerloccei\",\"securityType\":\"cs\",\"bidPrice\":0,\"bidSize\":0,\"askPrice\":0,\"askSize\":0,\"lastUpdated\":1638239671098,\"lastSalePrice\":135.04,\"lastSaleSize\":104,\"lastSaleTime\":1656554394913,\"volume\":2101406}]"
+-- (\(Right x)->x) obj :: L8.ByteString
+-- decode ((\(Right x)->x) obj) :: Maybe [Object]
+-- fromMaybe mempty $ decode ((\(Right x)->x) obj) :: Maybe [Object]
+
+-- obj <- getNonJSONData "https://sandbox.iexapis.com/stable/tops?symbols=aapl&token=Tpk_8d1fbeccf06745019a98635b05346b90"
+-- obj' = head $ fromJust ( fromMaybe mempty $ decode ((\(Right x)->x) obj) :: Maybe [Object])
+-- parse ((.:) obj') (Data.Text.pack "lastSalePrice") :: Result Double
+-- parse ((.:) obj') (Data.Text.pack "symbol") :: Result String
 

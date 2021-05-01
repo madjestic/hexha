@@ -1,0 +1,516 @@
+AuthAndSymbol	./Stocks.hs	107
+Batch	./Stocks.hs	141
+Batch	./Stocks.hs	141
+BatchQuery	./Stocks.hs	109
+Book	./IEX/Book.hs	10
+Book	./IEX/Book.hs	10
+Chart	./IEX/Chart.hs	9
+Chart	./IEX/Chart.hs	9
+ChartQuery	./Stocks.hs	110
+Company	./IEX/Company.hs	9
+Company	./IEX/Company.hs	9
+CompanyQuery	./Stocks.hs	111
+DelayedQuote	./IEX/DelayedQuote.hs	9
+DelayedQuote	./IEX/DelayedQuote.hs	9
+DelayedQuoteQuery	./Stocks.hs	112
+Dividend	./IEX/Dividend.hs	9
+Dividend	./IEX/Dividend.hs	9
+DividendQuery	./Stocks.hs	113
+Earning	./IEX/Earnings.hs	10
+Earning	./IEX/Earnings.hs	10
+Earnings	./IEX/Earnings.hs	22
+Earnings	./IEX/Earnings.hs	22
+EarningsQuery	./Stocks.hs	114
+EffectiveSpread	./IEX/EffectiveSpread.hs	9
+EffectiveSpread	./IEX/EffectiveSpread.hs	9
+EffectiveSpreadQuery	./Stocks.hs	115
+Financial	./IEX/Financials.hs	10
+Financial	./IEX/Financials.hs	10
+Financials	./IEX/Financials.hs	33
+Financials	./IEX/Financials.hs	33
+FinancialsQuery	./Stocks.hs	116
+FromJSON Batch	./Stocks.hs	163
+FromJSON Book	./IEX/Book.hs	31
+FromJSON Chart	./IEX/Chart.hs	66
+FromJSON Company	./IEX/Company.hs	29
+FromJSON DelayedQuote	./IEX/DelayedQuote.hs	20
+FromJSON Dividend	./IEX/Dividend.hs	29
+FromJSON Earning	./IEX/Earnings.hs	38
+FromJSON Earnings	./IEX/Earnings.hs	37
+FromJSON EffectiveSpread	./IEX/EffectiveSpread.hs	19
+FromJSON Financial	./IEX/Financials.hs	40
+FromJSON Financials	./IEX/Financials.hs	41
+FromJSON IntraDayStats	./IEX/IntraDayStats.hs	25
+FromJSON IntraDaySub	./IEX/IntraDayStats.hs	26
+FromJSON Market	./IEX/Market.hs	22
+FromJSON NewsItem	./IEX/NewsItem.hs	19
+FromJSON OHLC	./IEX/OHLC.hs	19
+FromJSON Previous	./IEX/Previous.hs	24
+FromJSON PriceTime	./IEX/PriceTime.hs	15
+FromJSON Quote	./IEX/Quote.hs	54
+FromJSON RecentStats	./IEX/RecentStats.hs	20
+FromJSON RecordStats	./IEX/RecordStats.hs	26
+FromJSON RecordStatsSub	./IEX/RecordStats.hs	27
+FromJSON Relevant	./IEX/Relevant.hs	15
+FromJSON Split	./IEX/Split.hs	20
+FromJSON Stats	./IEX/Stats.hs	72
+FromJSON TimeSeries	./IEX/TimeSeries.hs	25
+FromJSON Trade	./IEX/Book.hs	32
+FromJSON VolumeByVenue	./IEX/VolumeByVenue.hs	19
+IntraDayStats	./IEX/IntraDayStats.hs	10
+IntraDayStats	./IEX/IntraDayStats.hs	10
+IntraDaySub	./IEX/IntraDayStats.hs	18
+IntraDaySub	./IEX/IntraDayStats.hs	18
+Market	./IEX/Market.hs	9
+Market	./IEX/Market.hs	9
+Net.IEX.Book	./IEX/Book.hs	3
+Net.IEX.Chart	./IEX/Chart.hs	3
+Net.IEX.Company	./IEX/Company.hs	3
+Net.IEX.DelayedQuote	./IEX/DelayedQuote.hs	3
+Net.IEX.Dividend	./IEX/Dividend.hs	3
+Net.IEX.Earnings	./IEX/Earnings.hs	3
+Net.IEX.EffectiveSpread	./IEX/EffectiveSpread.hs	3
+Net.IEX.Financials	./IEX/Financials.hs	3
+Net.IEX.IntraDayStats	./IEX/IntraDayStats.hs	3
+Net.IEX.Market	./IEX/Market.hs	3
+Net.IEX.NewsItem	./IEX/NewsItem.hs	3
+Net.IEX.OHLC	./IEX/OHLC.hs	3
+Net.IEX.Previous	./IEX/Previous.hs	3
+Net.IEX.PriceTime	./IEX/PriceTime.hs	3
+Net.IEX.Quote	./IEX/Quote.hs	3
+Net.IEX.RecentStats	./IEX/RecentStats.hs	3
+Net.IEX.RecordStats	./IEX/RecordStats.hs	3
+Net.IEX.Relevant	./IEX/Relevant.hs	3
+Net.IEX.Split	./IEX/Split.hs	3
+Net.IEX.Stats	./IEX/Stats.hs	3
+Net.IEX.TimeSeries	./IEX/TimeSeries.hs	3
+Net.IEX.VolumeByVenue	./IEX/VolumeByVenue.hs	3
+Net.Stocks	./Stocks.hs	5
+NewsItem	./IEX/NewsItem.hs	9
+NewsItem	./IEX/NewsItem.hs	9
+NewsQuery	./Stocks.hs	109
+OHLC	./IEX/OHLC.hs	11
+OHLC	./IEX/OHLC.hs	11
+OHLCQuery	./Stocks.hs	118
+Previous	./IEX/Previous.hs	9
+Previous	./IEX/Previous.hs	9
+PreviousQuery	./Stocks.hs	120
+PriceTime	./IEX/PriceTime.hs	9
+PriceTime	./IEX/PriceTime.hs	9
+PriceTimeQuery	./Stocks.hs	119
+Quote	./IEX/Quote.hs	9
+Quote	./IEX/Quote.hs	10
+QuoteQuery	./Stocks.hs	121
+RecentStats	./IEX/RecentStats.hs	10
+RecentStats	./IEX/RecentStats.hs	10
+RecordStats	./IEX/RecordStats.hs	10
+RecordStats	./IEX/RecordStats.hs	10
+RecordStatsSub	./IEX/RecordStats.hs	17
+RecordStatsSub	./IEX/RecordStats.hs	17
+Relevant	./IEX/Relevant.hs	9
+Relevant	./IEX/Relevant.hs	9
+Split	./IEX/Split.hs	9
+Split	./IEX/Split.hs	9
+SplitQuery	./Stocks.hs	122
+Stats	./IEX/Stats.hs	9
+Stats	./IEX/Stats.hs	9
+StatsQuery	./Stocks.hs	117
+Symbol	./Stocks.hs	106
+TimeSeries	./IEX/TimeSeries.hs	9
+TimeSeries	./IEX/TimeSeries.hs	9
+ToJSON Batch	./Stocks.hs	160
+ToJSON Book	./IEX/Book.hs	29
+ToJSON Chart	./IEX/Chart.hs	65
+ToJSON Company	./IEX/Company.hs	28
+ToJSON DelayedQuote	./IEX/DelayedQuote.hs	19
+ToJSON Dividend	./IEX/Dividend.hs	28
+ToJSON Earning	./IEX/Earnings.hs	36
+ToJSON Earnings	./IEX/Earnings.hs	35
+ToJSON EffectiveSpread	./IEX/EffectiveSpread.hs	18
+ToJSON Financial	./IEX/Financials.hs	38
+ToJSON Financials	./IEX/Financials.hs	39
+ToJSON IntraDayStats	./IEX/IntraDayStats.hs	23
+ToJSON IntraDaySub	./IEX/IntraDayStats.hs	24
+ToJSON Market	./IEX/Market.hs	21
+ToJSON NewsItem	./IEX/NewsItem.hs	18
+ToJSON OHLC	./IEX/OHLC.hs	18
+ToJSON Previous	./IEX/Previous.hs	23
+ToJSON PriceTime	./IEX/PriceTime.hs	14
+ToJSON Quote	./IEX/Quote.hs	53
+ToJSON RecentStats	./IEX/RecentStats.hs	19
+ToJSON RecordStats	./IEX/RecordStats.hs	24
+ToJSON RecordStatsSub	./IEX/RecordStats.hs	25
+ToJSON Relevant	./IEX/Relevant.hs	14
+ToJSON Split	./IEX/Split.hs	19
+ToJSON Stats	./IEX/Stats.hs	71
+ToJSON TimeSeries	./IEX/TimeSeries.hs	24
+ToJSON Trade	./IEX/Book.hs	30
+ToJSON VolumeByVenue	./IEX/VolumeByVenue.hs	18
+Trade	./IEX/Book.hs	17
+Trade	./IEX/Book.hs	17
+VolumeByVenue	./IEX/VolumeByVenue.hs	9
+VolumeByVenue	./IEX/VolumeByVenue.hs	9
+VolumeByVenueQuery	./Stocks.hs	123
+actualEPS	./IEX/Earnings.hs	11
+amount	./IEX/Dividend.hs	14
+announceTime	./IEX/Earnings.hs	14
+asks	./IEX/Book.hs	13
+average	./IEX/Chart.hs	28
+avg30Value	./IEX/RecordStats.hs	21
+avgMarketPercent	./IEX/VolumeByVenue.hs	15
+avgTotalVolume	./IEX/Quote.hs	41
+baseURL	./Stocks.hs	165
+batchQueryToStr	./Stocks.hs	125
+beta	./IEX/Stats.hs	12
+bids	./IEX/Book.hs	12
+calculationPrice	./IEX/Quote.hs	15
+cash	./IEX/Stats.hs	34
+cashChange	./IEX/Financials.hs	28
+cashFlow	./IEX/Financials.hs	29
+ceo	./IEX/Company.hs	16
+change	./IEX/Chart.hs	58
+change	./IEX/Previous.hs	18
+change	./IEX/Quote.hs	37
+change	./IEX/TimeSeries.hs	17
+changeOverTime	./IEX/Chart.hs	48
+changeOverTime	./IEX/TimeSeries.hs	21
+changePercent	./IEX/Chart.hs	60
+changePercent	./IEX/Previous.hs	19
+changePercent	./IEX/Quote.hs	38
+changePercent	./IEX/TimeSeries.hs	18
+chart	./Stocks.hs	143
+close	./IEX/Chart.hs	54
+close	./IEX/OHLC.hs	13
+close	./IEX/Previous.hs	15
+close	./IEX/Quote.hs	18
+close	./IEX/TimeSeries.hs	14
+closeTime	./IEX/Quote.hs	19
+company	./Stocks.hs	144
+companyName	./IEX/Company.hs	11
+companyName	./IEX/Quote.hs	12
+companyName	./IEX/Stats.hs	10
+consensusEPS	./IEX/Earnings.hs	12
+consensusEPS	./IEX/Stats.hs	26
+costOfRevenue	./IEX/Financials.hs	13
+currentAssets	./IEX/Financials.hs	20
+currentCash	./IEX/Financials.hs	23
+currentDebt	./IEX/Financials.hs	24
+customOptionsCompany	./IEX/Company.hs	21
+customOptionsDividend	./IEX/Dividend.hs	21
+customOptionsEarning	./IEX/Earnings.hs	27
+customOptionsStats	./IEX/Stats.hs	62
+date	./IEX/Chart.hs	50
+date	./IEX/Previous.hs	11
+date	./IEX/RecentStats.hs	11
+date	./IEX/TimeSeries.hs	10
+date	./IEX/VolumeByVenue.hs	13
+datetime	./IEX/NewsItem.hs	10
+day200MovingAvg	./IEX/Stats.hs	46
+day30ChangePercent	./IEX/Stats.hs	59
+day50MovingAvg	./IEX/Stats.hs	47
+day5ChangePercent	./IEX/Stats.hs	58
+debt	./IEX/Stats.hs	35
+declaredDate	./IEX/Dividend.hs	13
+declaredDate	./IEX/Split.hs	11
+delayedPrice	./IEX/DelayedQuote.hs	11
+delayedPrice	./IEX/Quote.hs	30
+delayedPriceTime	./IEX/DelayedQuote.hs	15
+delayedPriceTime	./IEX/Quote.hs	31
+delayedQuote	./Stocks.hs	145
+delayedSize	./IEX/DelayedQuote.hs	14
+description	./IEX/Company.hs	15
+dividend	./Stocks.hs	146
+dividendRate	./IEX/Stats.hs	18
+dividendYield	./IEX/Stats.hs	19
+dtype	./IEX/Dividend.hs	16
+earnings	./IEX/Earnings.hs	24
+earnings	./Stocks.hs	147
+ebitda	./IEX/Stats.hs	31
+effectiveQuoted	./IEX/EffectiveSpread.hs	14
+effectiveSpread	./IEX/EffectiveSpread.hs	13
+effectiveSpread	./Stocks.hs	148
+epsReportDate	./IEX/Earnings.hs	17
+epsSurpriseDollar	./IEX/Earnings.hs	16
+epsSurpriseDollar	./IEX/Stats.hs	28
+epsSurprisePercent	./IEX/Stats.hs	29
+estimatedEPS	./IEX/Earnings.hs	13
+exDate	./IEX/Dividend.hs	10
+exDate	./IEX/Split.hs	10
+exDividendDate	./IEX/Stats.hs	20
+exchange	./IEX/Company.hs	12
+extendedChange	./IEX/Quote.hs	33
+extendedChangePercent	./IEX/Quote.hs	34
+extendedPrice	./IEX/Quote.hs	32
+extendedPriceTime	./IEX/Quote.hs	35
+financials	./IEX/Financials.hs	35
+financials	./Stocks.hs	149
+fiscalEndDate	./IEX/Earnings.hs	19
+fiscalPeriod	./IEX/Earnings.hs	18
+flag	./IEX/Dividend.hs	15
+float	./IEX/Stats.hs	24
+forFactor	./IEX/Split.hs	16
+getBatch	./Stocks.hs	427
+getBatchCompany	./Stocks.hs	440
+getBook	./Stocks.hs	258
+getBook'	./Stocks.hs	576
+getChart	./Stocks.hs	186
+getChart'	./Stocks.hs	504
+getChart1m	./Stocks.hs	240
+getChart1m'	./Stocks.hs	558
+getChart1y	./Stocks.hs	213
+getChart1y'	./Stocks.hs	531
+getChart2y	./Stocks.hs	204
+getChart2y'	./Stocks.hs	522
+getChart3m	./Stocks.hs	231
+getChart3m'	./Stocks.hs	549
+getChart5y	./Stocks.hs	195
+getChart5y'	./Stocks.hs	513
+getChart6m	./Stocks.hs	222
+getChart6m'	./Stocks.hs	540
+getCompany	./Stocks.hs	249
+getCompany'	./Stocks.hs	567
+getDelayedDividend	./Stocks.hs	276
+getDelayedDividend'	./Stocks.hs	594
+getDelayedQuote	./Stocks.hs	267
+getDelayedQuote'	./Stocks.hs	585
+getEarnings	./Stocks.hs	285
+getEarnings'	./Stocks.hs	603
+getEffectiveSpread	./Stocks.hs	294
+getEffectiveSpread'	./Stocks.hs	612
+getFinancials	./Stocks.hs	303
+getFinancials'	./Stocks.hs	621
+getHistoricalStats	./Stocks.hs	488
+getIntraDayStats	./Stocks.hs	461
+getMarket	./Stocks.hs	452
+getNewsItem	./Stocks.hs	321
+getNewsItem'	./Stocks.hs	639
+getNonJSONData	./Stocks.hs	499
+getOHLC	./Stocks.hs	330
+getOHLC'	./Stocks.hs	648
+getPeers	./Stocks.hs	339
+getPeers'	./Stocks.hs	657
+getPrevious	./Stocks.hs	348
+getPrevious'	./Stocks.hs	666
+getPrice	./Stocks.hs	358
+getPrice'	./Stocks.hs	676
+getQuote	./Stocks.hs	367
+getQuote'	./Stocks.hs	685
+getRecentStats	./Stocks.hs	470
+getRecordStats	./Stocks.hs	479
+getRelevant	./Stocks.hs	376
+getRelevant'	./Stocks.hs	694
+getSplit	./Stocks.hs	385
+getSplit'	./Stocks.hs	703
+getStats	./Stocks.hs	312
+getStats'	./Stocks.hs	630
+getTS	./Stocks.hs	403
+getTS'	./Stocks.hs	721
+getVolumeByVenue	./Stocks.hs	394
+getVolumeByVenue'	./Stocks.hs	712
+grossProfit	./IEX/Financials.hs	12
+grossProfit	./IEX/Stats.hs	33
+headline	./IEX/NewsItem.hs	11
+high	./IEX/Chart.hs	38
+high	./IEX/DelayedQuote.hs	12
+high	./IEX/OHLC.hs	14
+high	./IEX/Previous.hs	13
+high	./IEX/Quote.hs	20
+high	./IEX/TimeSeries.hs	12
+iexAskPrice	./IEX/Quote.hs	44
+iexAskSize	./IEX/Quote.hs	45
+iexBidPrice	./IEX/Quote.hs	42
+iexBidSize	./IEX/Quote.hs	43
+iexLastUpdated	./IEX/Quote.hs	29
+iexMarketPercent	./IEX/Quote.hs	39
+iexRealtimePrice	./IEX/Quote.hs	27
+iexRealtimeSize	./IEX/Quote.hs	28
+iexVolume	./IEX/Quote.hs	40
+indicated	./IEX/Dividend.hs	18
+industry	./IEX/Company.hs	13
+insiderPercent	./IEX/Stats.hs	49
+institutionPercent	./IEX/Stats.hs	48
+intraDayURL	./Stocks.hs	174
+isHalfday	./IEX/RecentStats.hs	15
+isISO	./IEX/Book.hs	21
+isOddLot	./IEX/Book.hs	22
+isOutsideRegularHours	./IEX/Book.hs	23
+isSinglePriceCross	./IEX/Book.hs	24
+isTradeThroughExempt	./IEX/Book.hs	25
+issueType	./IEX/Company.hs	17
+label	./IEX/Chart.hs	45
+label	./IEX/TimeSeries.hs	20
+lastUpdated	./IEX/IntraDayStats.hs	20
+lastUpdated	./IEX/Market.hs	18
+latestEPS	./IEX/Stats.hs	21
+latestEPSDate	./IEX/Stats.hs	22
+latestPrice	./IEX/Quote.hs	22
+latestSource	./IEX/Quote.hs	23
+latestTime	./IEX/Quote.hs	24
+latestUpdate	./IEX/Quote.hs	25
+latestVolume	./IEX/Quote.hs	26
+litVolume	./IEX/RecentStats.hs	16
+low	./IEX/Chart.hs	40
+low	./IEX/DelayedQuote.hs	13
+low	./IEX/OHLC.hs	15
+low	./IEX/Previous.hs	14
+low	./IEX/Quote.hs	21
+low	./IEX/TimeSeries.hs	13
+lowerString	./Stocks.hs	180
+marketAverage	./IEX/Chart.hs	13
+marketCap	./IEX/Quote.hs	46
+marketChangeOverTime	./IEX/Chart.hs	26
+marketHigh	./IEX/Chart.hs	19
+marketLow	./IEX/Chart.hs	21
+marketNotional	./IEX/Chart.hs	15
+marketNumberOfTrades	./IEX/Chart.hs	17
+marketPercent	./IEX/Market.hs	17
+marketPercent	./IEX/VolumeByVenue.hs	14
+marketShare	./IEX/IntraDayStats.hs	15
+marketShare	./IEX/RecentStats.hs	14
+marketURL	./Stocks.hs	171
+marketVolume	./IEX/Chart.hs	23
+marketcap	./IEX/Stats.hs	11
+mic	./IEX/Market.hs	10
+minute	./IEX/Chart.hs	11
+month1ChangePercent	./IEX/Stats.hs	57
+month3ChangePercent	./IEX/Stats.hs	56
+month6ChangePercent	./IEX/Stats.hs	55
+netIncome	./IEX/Financials.hs	17
+news	./Stocks.hs	142
+notional	./IEX/Chart.hs	30
+notional	./IEX/IntraDayStats.hs	14
+notional	./IEX/RecordStats.hs	14
+numberOfEstimates	./IEX/Earnings.hs	15
+numberOfEstimates	./IEX/Stats.hs	27
+numberOfTrades	./IEX/Chart.hs	32
+ohlc	./Stocks.hs	151
+open	./IEX/Chart.hs	52
+open	./IEX/OHLC.hs	12
+open	./IEX/Previous.hs	12
+open	./IEX/Quote.hs	16
+open	./IEX/TimeSeries.hs	11
+openTime	./IEX/Quote.hs	17
+operatingExpense	./IEX/Financials.hs	19
+operatingGainsLosses	./IEX/Financials.hs	30
+operatingIncome	./IEX/Financials.hs	16
+operatingRevenue	./IEX/Financials.hs	14
+parseJSON	./IEX/Company.hs	30
+parseJSON	./IEX/Dividend.hs	30
+parseJSON	./IEX/Earnings.hs	39
+parseJSON	./IEX/Stats.hs	73
+paymentDate	./IEX/Dividend.hs	11
+paymentDate	./IEX/Split.hs	13
+peRatio	./IEX/Quote.hs	47
+peRatioHigh	./IEX/Stats.hs	39
+peRatioLow	./IEX/Stats.hs	40
+peers	./IEX/Relevant.hs	10
+previous	./Stocks.hs	153
+previousClose	./IEX/Quote.hs	36
+previousDayValue	./IEX/RecordStats.hs	20
+price	./IEX/Book.hs	18
+price	./IEX/PriceTime.hs	10
+priceImprovement	./IEX/EffectiveSpread.hs	15
+priceTime	./Stocks.hs	152
+priceToBook	./IEX/Stats.hs	45
+priceToSales	./IEX/Stats.hs	44
+primaryExchange	./IEX/Quote.hs	13
+processedTime	./IEX/DelayedQuote.hs	16
+profitMargin	./IEX/Stats.hs	43
+qualified	./IEX/Dividend.hs	17
+questionMark	./Stocks.hs	423
+quote	./IEX/Book.hs	11
+quote	./Stocks.hs	154
+ratio	./IEX/Split.hs	14
+recordDate	./IEX/Dividend.hs	12
+recordDate	./IEX/RecordStats.hs	19
+recordDate	./IEX/Split.hs	12
+recordValue	./IEX/RecordStats.hs	18
+related	./IEX/NewsItem.hs	15
+reportDate	./IEX/Financials.hs	11
+researchAndDevelopment	./IEX/Financials.hs	18
+returnOnAssets	./IEX/Stats.hs	41
+returnOnCapital	./IEX/Stats.hs	42
+returnOnEquity	./IEX/Stats.hs	25
+revenue	./IEX/Stats.hs	32
+revenuePerEmployee	./IEX/Stats.hs	38
+revenuePerShare	./IEX/Stats.hs	37
+routedVolume	./IEX/IntraDayStats.hs	13
+routedVolume	./IEX/RecentStats.hs	13
+routedVolume	./IEX/RecordStats.hs	13
+sandboxURL	./Stocks.hs	168
+sector	./IEX/Company.hs	18
+sector	./IEX/Quote.hs	14
+shareholderEquity	./IEX/Financials.hs	27
+sharesOutstanding	./IEX/Stats.hs	23
+shortDate	./IEX/Stats.hs	17
+shortInterest	./IEX/Stats.hs	16
+shortRatio	./IEX/Stats.hs	50
+simplifyFactor	./IEX/Chart.hs	36
+size	./IEX/Book.hs	19
+source	./IEX/NewsItem.hs	12
+split	./Stocks.hs	155
+stats	./Stocks.hs	150
+statsURL	./Stocks.hs	177
+summary	./IEX/NewsItem.hs	14
+symbol	./IEX/Company.hs	10
+symbol	./IEX/DelayedQuote.hs	10
+symbol	./IEX/Earnings.hs	23
+symbol	./IEX/Financials.hs	34
+symbol	./IEX/Previous.hs	10
+symbol	./IEX/Quote.hs	11
+symbol	./IEX/Stats.hs	30
+symbolQuery	./Stocks.hs	419
+symbols	./IEX/Relevant.hs	11
+symbolsTraded	./IEX/IntraDayStats.hs	12
+symbolsTraded	./IEX/RecordStats.hs	12
+tapeA	./IEX/Market.hs	14
+tapeB	./IEX/Market.hs	15
+tapeC	./IEX/Market.hs	16
+tapeId	./IEX/Market.hs	11
+time	./IEX/PriceTime.hs	11
+timestamp	./IEX/Book.hs	26
+toFactor	./IEX/Split.hs	15
+tokenize	./Stocks.hs	183
+totalAssets	./IEX/Financials.hs	21
+totalCash	./IEX/Financials.hs	25
+totalDebt	./IEX/Financials.hs	26
+totalLiabilities	./IEX/Financials.hs	22
+totalRevenue	./IEX/Financials.hs	15
+tradeId	./IEX/Book.hs	20
+trades	./IEX/Book.hs	14
+ttmEPS	./IEX/Stats.hs	36
+typeQuery	./Stocks.hs	414
+unadjustedVolume	./IEX/Chart.hs	56
+unadjustedVolume	./IEX/Previous.hs	17
+unadjustedVolume	./IEX/TimeSeries.hs	16
+url	./IEX/NewsItem.hs	13
+value	./IEX/IntraDayStats.hs	19
+venue	./IEX/EffectiveSpread.hs	11
+venue	./IEX/VolumeByVenue.hs	11
+venueName	./IEX/EffectiveSpread.hs	12
+venueName	./IEX/Market.hs	12
+venueName	./IEX/VolumeByVenue.hs	12
+volume	./IEX/Chart.hs	42
+volume	./IEX/EffectiveSpread.hs	10
+volume	./IEX/IntraDayStats.hs	11
+volume	./IEX/Market.hs	13
+volume	./IEX/Previous.hs	16
+volume	./IEX/RecentStats.hs	12
+volume	./IEX/RecordStats.hs	11
+volume	./IEX/TimeSeries.hs	15
+volume	./IEX/VolumeByVenue.hs	10
+volumeByVenue	./Stocks.hs	156
+vwap	./IEX/Chart.hs	62
+vwap	./IEX/Previous.hs	20
+vwap	./IEX/TimeSeries.hs	19
+website	./IEX/Company.hs	14
+week52High	./IEX/Quote.hs	48
+week52Low	./IEX/Quote.hs	49
+week52change	./IEX/Stats.hs	15
+week52high	./IEX/Stats.hs	13
+week52low	./IEX/Stats.hs	14
+year1ChangePercent	./IEX/Stats.hs	53
+year2ChangePercent	./IEX/Stats.hs	52
+year5ChangePercent	./IEX/Stats.hs	51
+ytdChange	./IEX/Quote.hs	50
+ytdChangePercent	./IEX/Stats.hs	54

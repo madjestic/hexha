@@ -13,24 +13,78 @@ maintainer:          madjestic13@gmail.com
 build-type:          Simple
 extra-source-files:  CHANGELOG.md, README.md
 
+library
+  hs-source-dirs:
+                       src
+  build-depends:
+                       base                  ^>= 4.14
+                     , stocks                ^>= 0.2.0.0
+                     , bytestring            ^>= 0.11.1.0
+                     , HUnit                 ^>= 1.6.2.0                  
+                     , http-conduit          ^>= 2.3.8
+                     , aeson                 ^>= 1.5.6.0
+                     -- , bytestring           ^>= 0.10.8.2
+                     , containers            ^>= 0.6.4.1
+                     -- , unordered-containers ^>= 0.2.8.0
+                     -- , semigroups           ^>= 0.18.4
+                     
+  exposed-modules:
+                       Utils
+                     -- , Net.Stocks
+                     -- , Net.IEX.Stats
+                     -- , Net.IEX.Chart
+                     -- , Net.IEX.Company
+                     -- , Net.IEX.Earnings
+                     -- , Net.IEX.DelayedQuote
+                     -- , Net.IEX.Dividend
+                     -- , Net.IEX.EffectiveSpread
+                     -- , Net.IEX.Financials
+                     -- , Net.IEX.NewsItem
+                     -- , Net.IEX.OHLC
+                     -- , Net.IEX.Previous
+                     -- , Net.IEX.PriceTime
+                     -- , Net.IEX.Quote
+                     -- , Net.IEX.Relevant
+                     -- , Net.IEX.Split
+                     -- , Net.IEX.VolumeByVenue
+                     -- , Net.IEX.Market
+                     -- , Net.IEX.IntraDayStats
+                     -- , Net.IEX.RecentStats
+                     -- , Net.IEX.RecordStats
+                     -- , Net.IEX.Book
+                     , Net.IEX.TimeSeries
+
+  other-modules:
+                       Paths_hexha
+  default-language:
+                       Haskell2010
+                       
+                       
 executable hexha
   ghc-options:        -threaded -Wall -Wcompat -O2           
   main-is:             Main.hs
   -- other-modules:
   -- other-extensions:
-  build-depends:       base           ^>= 4.14
-                     , bytestring     ^>= 0.10.12.1
-                     , cassava        ^>= 0.5.2.0
-                     , coinbase-pro   ^>= 0.9.2.0
-                     , parallel       ^>= 3.2.2.0
-                     , massiv         ^>= 0.6.0.0
-                     , brick
-                     , vty
-                     , text
-                     , microlens      ^>= 0.4.12.0
-                     , vector         
-                     , asciichart     ^>= 1.0.2
-                     , raw-strings-qq ^>= 1.1
+  build-depends:       base                  ^>= 4.14
+                     , aeson                 ^>= 1.5.6.0
+                     , bytestring            ^>= 0.11.1.0
+                     , cassava               ^>= 0.5.2.0
+                     , containers            ^>= 0.6.4.1
+                     , http-conduit          ^>= 2.3.8
+                     -- , coinbase-pro   ^>= 0.9.2.0
+                     , parallel              ^>= 3.2.2.0
+                     , massiv                ^>= 0.6.0.0
+                     , brick                  
+                     , vty                    
+                     , text                   
+                     , microlens             ^>= 0.4.12.0
+                     , vector                 
+                     , asciichart            ^>= 1.0.2
+                     , raw-strings-qq        ^>= 1.1
                      
-  -- hs-source-dirs:
+  hs-source-dirs:      app
+                     , src
   default-language:    Haskell2010
+  other-modules:
+                       Paths_hexha
+  
