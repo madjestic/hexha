@@ -31,16 +31,79 @@ import Control.Exception
 import qualified Data.ByteString.Lazy.Char8 as L8
 import Net.Stocks
 import qualified Net.IEX.TimeSeries         as IEXTimeSeries
+-- import Control.Monad.Writer
+-- import Control.Monad.State
+import System.IO
+import System.IO.Strict                     as S
+import System.Directory  
+import Data.List
 
-import Control.Monad.Writer
-import Control.Monad.State
+import           Control.Monad                     (forever)
+import qualified System.IO.Streams                 as Streams
+import           Net.CoinbasePro.Environment       (Environment (..))
+import           Net.CoinbasePro.Types             (ProductId (..))
+import           Net.CoinbasePro.WebSocketFeed         (subscribeToFeed)
+import           Net.CoinbasePro.WebSocketFeed.Request (ChannelName (..))
+import           Net.CoinbasePro.WebSocketFeed.Channel (ChannelMessage (..))
+import           Net.CoinbasePro.WebSocketFeed.Channel.Full.Match    as M
+import           Net.CoinbasePro.WebSocketFeed.Channel.Full.Open     as O
+import           Net.CoinbasePro.WebSocketFeed.Channel.Full.Done     as D
+import           Net.CoinbasePro.WebSocketFeed.Channel.Full.Received as R
+import           Net.CoinbasePro.Types (Price (..))
 
 import Debug.Trace    as DT
 
 type Name = ()
 
 ---------------------------------------------------------------------------------------------------------------------------------------------------------------
---- iexcloud --------------------------------------------------------------------------------------------------------------------------------------------------
+--- COINBASE PRO ----------------------------------------------------------------------------------------------------------------------------------------------
+
+logFile = ".log" :: FilePath
+
+logger :: Maybe String -> IO String
+logger Nothing  = do
+  s <- S.readFile logFile
+  return s
+logger (Just s) = do
+  h <- openFile logFile AppendMode
+  hPutStrLn h s
+  hClose h
+
+  s <- S.readFile logFile
+  return s
+
+readPrice :: Maybe ChannelMessage -> IO (Maybe String)
+readPrice msg = do
+  case msg of
+    Just (MatchMessage x) -> return $ Just (show $ unPrice $ M.price x)
+    Just (OpenMessage  x) -> return $ Just (show $ unPrice $ O.price x)
+    Just (ReceivedMessage r) -> return $ rPrice r
+    Just (DoneMessage     d) -> return $ dPrice d
+    _ -> return Nothing
+    where
+      dPrice d =
+        case (D.price d) of
+          Just p -> Just (show $ unPrice p)
+          Nothing -> Nothing
+      
+      rPrice r =
+        case (R.price r) of
+          Just p -> Just (show $ unPrice p)
+          Nothing -> Nothing
+      
+logPrice :: IO ()
+logPrice = do
+  msgs <- subscribeToFeed [ProductId "BTC-USD"] [Full] Sandbox Nothing
+  forever $ Streams.read msgs >>= readPrice >>= logger
+
+-- TODO: graphPrice:
+graphPrice :: FilePath -> IO ()
+graphPrice f = undefined
+
+---------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+---------------------------------------------------------------------------------------------------------------------------------------------------------------
+--- IEX CLOUD -------------------------------------------------------------------------------------------------------------------------------------------------
 
 type AuthAndSymbol = (String, Symbol)
 type Symbol = String
@@ -52,9 +115,23 @@ parms = QSParms 0 0
 symb  = "AAPL"
 token = "Tpk_8d1fbeccf06745019a98635b05346b90"
 query = "https://sandbox.iexapis.com/stable/stock/aapl/quote?token=Tpk_8d1fbeccf06745019a98635b05346b90"
+        -- "https://sandbox.iexapis.com/stable/time-series/REPORTED_FINANCIALS/AAPL/10-Q?from=2010-01-01&interval=2&format=csv?token=Tpk_8d1fbeccf06745019a98635b05346b90"
+        -- "https://sandbox.iexapis.com/stable/stock/AAPL/previous/quote?token=Tpk_8d1fbeccf06745019a98635b05346b90" -- previous day range
+        -- "https://sandbox.iexapis.com/stable/stock/AAPL/chart/3m?token=Tpk_8d1fbeccf06745019a98635b05346b90"          -- 3 months range
+        -- "https://sandbox.iexapis.com/stable/stock/AAPL/chart/1m?token=Tpk_8d1fbeccf06745019a98635b05346b90"          -- 1 month  range
+        -- "https://sandbox.iexapis.com/stable/stock/AAPL/chart/7d?token=Tpk_8d1fbeccf06745019a98635b05346b90"          -- 7 days
+        -- "https://sandbox.iexapis.com/stable/stock/AAPL/chart/1d?token=Tpk_8d1fbeccf06745019a98635b05346b90"          -- 1 day per minute
+        -- https://iexcloud.io/docs/api/#historical-prices
 
-test :: IO ()
-test = do
+        -- "https://sandbox.iexapis.com/stable/stock/AAPL/intraday-prices?token=Tpk_8d1fbeccf06745019a98635b05346b90"   -- intraday prices
+        -- https://iexcloud.io/docs/api/#intraday-prices -- API docs.
+-- TODO: historic prices rest call   type
+-- TODO: hustoric prices rest return type
+-- TODO: same for intraday prices: intraday type call
+--                                 intraday type return
+
+testIEX :: IO ()
+testIEX = do
   obj <- getNonJSONData "https://sandbox.iexapis.com/stable/stock/AAPL/quote?token=Tpk_8d1fbeccf06745019a98635b05346b90"
   let obj'        = fromJust ( fromMaybe mempty $ decode ((\(Right x)->x) obj) :: Maybe Object)
       latestPrice = parse ((.:) obj') (pack "latestPrice") :: Result Double
@@ -72,6 +149,10 @@ test = do
 
   putStrLn $ symbol' ++ " : " ++ (show latestPrice')
   return ()
+
+-- TODO : do similar to CoinbasePro logPrice
+logPrice' :: IO ()
+logPrice' = undefined
 
 ---------------------------------------------------------------------------------------------------------------------------------------------------------------
 
