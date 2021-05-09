@@ -36,7 +36,7 @@ import qualified Net.IEX.TimeSeries         as IEXTimeSeries
 import System.IO
 import System.IO.Strict                     as S
 import System.Directory  
-import Data.List
+import Data.List                            as DL
 
 import           Control.Monad                     (forever)
 import qualified System.IO.Streams                 as Streams
@@ -104,11 +104,14 @@ options' :: C.Options
 options' =
   C.Options { height = 14 }
 
-graphPrice :: IO [String]
+--graphPrice :: IO [String]
+graphPrice :: IO String
 graphPrice = do
   s <- S.readFile logFile
-  let d = fmap round (fmap read $ lines s :: [Double]) :: [Integer]
-      result = plotWith' options' d
+  let  --s'= DL.reverse . (take 100) . DL.reverse $ s
+      d = DL.reverse . (take 80) . DL.reverse $ fmap round (fmap read $ lines s :: [Double]) :: [Integer]
+      --result = plotWith' options' d
+      result = unlines $ plotWithString options' d
   return result
 
 s = "58880.1\n58880.1\n58880.11\n58880.11\n58880.04\n58880.02\n58880.04\n58800.0\n58800.0\n58880.11\n58880.1\n58880.09\n58880.08\n58880.07\n58880.06\n58880.05\n58880.04\n58879.95\n58879.96\n58879.97\n58879.98\n58879.99\n58880.0\n58880.01\n58880.02\n58852.13\n58852.13\n58852.12\n58852.12\n58852.11\n58852.11\n58852.1\n58852.1\n58852.09\n58852.09\n58852.08\n58852.08\n58852.07\n58852.07\n58852.06\n58852.06\n58852.15\n58852.15\n58852.16\n58852.16\n58852.17\n58852.17\n58852.18\n58852.18\n58852.19\n58852.19\n58852.2\n58852.2\n58852.21\n58852.21\n58852.22\n58852.22\n58852.15\n58852.22\n58852.21\n58852.2\n58852.19\n58852.18\n58852.17\n58852.16\n58852.15\n58852.06\n58852.07\n58852.08\n58852.09\n58852.1\n58852.11\n58852.12\n58852.13\n58843.06\n58843.06\n58843.05\n58843.05\n58843.04\n58843.04\n58843.03\n58843.03\n58843.02\n58843.02\n58843.01\n58843.01\n58843.0\n58843.0\n58842.99\n58842.99\n58843.08\n58843.08\n58843.09\n58843.09\n58843.1\n58843.1\n58843.11\n58843.11\n58843.12\n58843.12\n58843.13\n58843.13\n58843.14\n58843.14\n58843.15\n58843.15\n" :: String
@@ -214,8 +217,8 @@ test2Output = tail [r|
 |]
 
 --drawUI :: (Show a) => L.List () a -> [Widget ()]
-drawUI :: L.List () String -> [Widget ()]
-drawUI l = [ui]
+drawUI :: String -> L.List () String -> [Widget ()]
+drawUI s l = [ui]
     where
         --lbl = str "Item " <+> cur <+> str " of " <+> total
         lbl = cur
@@ -234,11 +237,11 @@ drawUI l = [ui]
           , test3Output]
         graph
           = B.borderWithLabel lbl $
-            hLimit 280 $
+            hLimit 80 $
             vLimit 15 $
             --str test1Output
-            str $ fs!!(sel `mod` length fs)
-            --str $ putStr "suka"
+            --str $ fs!!(sel `mod` length fs)
+            str s
 
         box
           = B.borderWithLabel lbl $
@@ -300,9 +303,9 @@ theMap = A.attrMap V.defAttr
     , (customAttr,            fg V.cyan)
     ]
 
-theApp :: M.App (L.List () String) e ()
-theApp =
-    M.App { M.appDraw = drawUI
+theApp :: String -> M.App (L.List () String) e ()
+theApp s =
+    M.App { M.appDraw = drawUI s
           , M.appChooseCursor = M.showFirstCursor
           , M.appHandleEvent = appEvent
           , M.appStartEvent = return
@@ -311,6 +314,10 @@ theApp =
 
 main :: IO ()
 main = do
-  s <- graphPrice
-  void $ M.defaultMain theApp initialState
-
+  --s <- graphPrice
+  --let s' = 
+  --void $ M.defaultMain (theApp s) initialState
+  --void $ logPriceCB >> graphPrice >>= (\s ->  M.defaultMain (theApp s) initialState)
+  msgs <- subscribeToFeed [ProductId "BTC-USD"] [Full] Sandbox Nothing
+  forever $ Streams.read msgs >>= readPrice >>= logPrice >> graphPrice >>= (\s ->  M.defaultMain (theApp s) initialState)
+  --forever $ M.defaultMain theApp initialState
