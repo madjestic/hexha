@@ -111,6 +111,7 @@ executable hexha
   build-depends:       base                  ^>= 4.14
                      , aeson                 ^>= 1.5.6.0
                      , aeson-casing          ^>= 0.2.0.0
+                     , array                  >=0.5 && <0.6
                      , asciichart            ^>= 1.0.2
                      , brick                  
                      , bytestring            ^>= 0.10.8.2
@@ -197,3 +198,4 @@ executable hexha
                      , Net.IEX.TimeSeries
                      , Net.IEX.VolumeByVenue
                      , Net.Stocks
+                     , Data.Text.Chart

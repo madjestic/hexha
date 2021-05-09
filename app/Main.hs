@@ -51,6 +51,8 @@ import           Net.CoinbasePro.WebSocketFeed.Channel.Full.Done     as D
 import           Net.CoinbasePro.WebSocketFeed.Channel.Full.Received as R
 import           Net.CoinbasePro.Types (Price (..))
 
+import Data.Text.Chart as C
+
 import Debug.Trace    as DT
 
 type Name = ()
@@ -60,11 +62,11 @@ type Name = ()
 
 logFile = ".log" :: FilePath
 
-logger :: Maybe String -> IO String
-logger Nothing  = do
+logPrice :: Maybe String -> IO String
+logPrice Nothing  = do
   s <- S.readFile logFile
   return s
-logger (Just s) = do
+logPrice (Just s) = do
   h <- openFile logFile AppendMode
   hPutStrLn h s
   hClose h
@@ -91,14 +93,29 @@ readPrice msg = do
           Just p -> Just (show $ unPrice p)
           Nothing -> Nothing
       
-logPrice :: IO ()
-logPrice = do
+logPriceCB :: IO ()
+logPriceCB = do
   msgs <- subscribeToFeed [ProductId "BTC-USD"] [Full] Sandbox Nothing
-  forever $ Streams.read msgs >>= readPrice >>= logger
+  forever $ Streams.read msgs >>= readPrice >>= logPrice
 
 -- TODO: graphPrice:
-graphPrice :: FilePath -> IO ()
-graphPrice f = undefined
+
+options' :: C.Options
+options' =
+  C.Options { height = 14 }
+
+graphPrice :: IO [String]
+graphPrice = do
+  s <- S.readFile logFile
+  let d = fmap round (fmap read $ lines s :: [Double]) :: [Integer]
+      result = plotWith' options' d
+  return result
+
+s = "58880.1\n58880.1\n58880.11\n58880.11\n58880.04\n58880.02\n58880.04\n58800.0\n58800.0\n58880.11\n58880.1\n58880.09\n58880.08\n58880.07\n58880.06\n58880.05\n58880.04\n58879.95\n58879.96\n58879.97\n58879.98\n58879.99\n58880.0\n58880.01\n58880.02\n58852.13\n58852.13\n58852.12\n58852.12\n58852.11\n58852.11\n58852.1\n58852.1\n58852.09\n58852.09\n58852.08\n58852.08\n58852.07\n58852.07\n58852.06\n58852.06\n58852.15\n58852.15\n58852.16\n58852.16\n58852.17\n58852.17\n58852.18\n58852.18\n58852.19\n58852.19\n58852.2\n58852.2\n58852.21\n58852.21\n58852.22\n58852.22\n58852.15\n58852.22\n58852.21\n58852.2\n58852.19\n58852.18\n58852.17\n58852.16\n58852.15\n58852.06\n58852.07\n58852.08\n58852.09\n58852.1\n58852.11\n58852.12\n58852.13\n58843.06\n58843.06\n58843.05\n58843.05\n58843.04\n58843.04\n58843.03\n58843.03\n58843.02\n58843.02\n58843.01\n58843.01\n58843.0\n58843.0\n58842.99\n58842.99\n58843.08\n58843.08\n58843.09\n58843.09\n58843.1\n58843.1\n58843.11\n58843.11\n58843.12\n58843.12\n58843.13\n58843.13\n58843.14\n58843.14\n58843.15\n58843.15\n" :: String
+d = fmap round (fmap read $ lines s :: [Double]) :: [Integer]
+  
+test3Output :: String
+test3Output = unlines $ plotWithString options' d
 
 ---------------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -151,8 +168,8 @@ testIEX = do
   return ()
 
 -- TODO : do similar to CoinbasePro logPrice
-logPrice' :: IO ()
-logPrice' = undefined
+logPriceIEX :: IO ()
+logPriceIEX = undefined
 
 ---------------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -168,7 +185,7 @@ test0Output = tail [r|
 3.00 ┤ ╭╯     ╰╮
 2.00 ┤╭╯       ╰╮
 1.00 ┼╯         ╰
-|]
+|]  
 
 test1Output :: String
 test1Output = tail [r|
@@ -196,8 +213,6 @@ test2Output = tail [r|
 -5.00 ┤────╯                                                 ╰─────
 |]
 
-
-
 --drawUI :: (Show a) => L.List () a -> [Widget ()]
 drawUI :: L.List () String -> [Widget ()]
 drawUI l = [ui]
@@ -215,13 +230,15 @@ drawUI l = [ui]
               Just i  -> i
         fs =
           [ test1Output
-          , test2Output ]
+          , test2Output
+          , test3Output]
         graph
           = B.borderWithLabel lbl $
-            hLimit 80 $
+            hLimit 280 $
             vLimit 15 $
             --str test1Output
             str $ fs!!(sel `mod` length fs)
+            --str $ putStr "suka"
 
         box
           = B.borderWithLabel lbl $
@@ -293,5 +310,7 @@ theApp =
           }
 
 main :: IO ()
-main = void $ M.defaultMain theApp initialState
+main = do
+  s <- graphPrice
+  void $ M.defaultMain theApp initialState
 
