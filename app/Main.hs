@@ -4,7 +4,7 @@
 module Main where
 
 import Lens.Micro ((^.))
-import Control.Monad (void)
+import Control.Monad ( void, forever )
 import Data.Maybe (fromMaybe)
 import qualified Graphics.Vty as V
 import Brick ( App(..)
@@ -35,13 +35,11 @@ import qualified Net.IEX.TimeSeries         as IEXTimeSeries
 -- import Control.Monad.State
 import System.IO
 import System.IO.Strict                     as S
-import System.Directory  
+import System.Directory
 import Data.List                            as DL
-
-import           Control.Monad                     (forever)
 import qualified System.IO.Streams                 as Streams
 import           Net.CoinbasePro.Environment       (Environment (..))
-import           Net.CoinbasePro.Types             (ProductId (..))
+import Net.CoinbasePro.Types ( ProductId(..), Price(..) )
 import           Net.CoinbasePro.WebSocketFeed         (subscribeToFeed)
 import           Net.CoinbasePro.WebSocketFeed.Request (ChannelName (..))
 import           Net.CoinbasePro.WebSocketFeed.Channel (ChannelMessage (..))
@@ -49,7 +47,6 @@ import           Net.CoinbasePro.WebSocketFeed.Channel.Full.Match    as M
 import           Net.CoinbasePro.WebSocketFeed.Channel.Full.Open     as O
 import           Net.CoinbasePro.WebSocketFeed.Channel.Full.Done     as D
 import           Net.CoinbasePro.WebSocketFeed.Channel.Full.Received as R
-import           Net.CoinbasePro.Types (Price (..))
 
 import Data.Text.Chart as C
 
@@ -64,18 +61,16 @@ logFile = ".log" :: FilePath
 
 logPrice :: Maybe String -> IO String
 logPrice Nothing  = do
-  s <- S.readFile logFile
-  return s
+  S.readFile logFile
 logPrice (Just s) = do
   h <- openFile logFile AppendMode
   hPutStrLn h s
   hClose h
 
-  s <- S.readFile logFile
-  return s
+  S.readFile logFile
 
 readPrice :: Maybe ChannelMessage -> IO (Maybe String)
-readPrice msg = do
+readPrice msg =
   case msg of
     Just (MatchMessage x) -> return $ Just (show $ unPrice $ M.price x)
     Just (OpenMessage  x) -> return $ Just (show $ unPrice $ O.price x)
@@ -84,41 +79,30 @@ readPrice msg = do
     _ -> return Nothing
     where
       dPrice d =
-        case (D.price d) of
+        case D.price d of
           Just p -> Just (show $ unPrice p)
           Nothing -> Nothing
-      
+
       rPrice r =
-        case (R.price r) of
+        case R.price r of
           Just p -> Just (show $ unPrice p)
           Nothing -> Nothing
-      
+
 logPriceCB :: IO ()
 logPriceCB = do
   msgs <- subscribeToFeed [ProductId "BTC-USD"] [Full] Sandbox Nothing
   forever $ Streams.read msgs >>= readPrice >>= logPrice
 
--- TODO: graphPrice:
-
 options' :: C.Options
 options' =
   C.Options { height = 14 }
 
---graphPrice :: IO [String]
 graphPrice :: IO String
 graphPrice = do
   s <- S.readFile logFile
-  let  --s'= DL.reverse . (take 100) . DL.reverse $ s
-      d = DL.reverse . (take 80) . DL.reverse $ fmap round (fmap read $ lines s :: [Double]) :: [Integer]
-      --result = plotWith' options' d
+  let d = DL.reverse . take 80 . DL.reverse $ fmap round (read <$> lines s :: [Double]) :: [Integer]
       result = unlines $ plotWithString options' d
   return result
-
-s = "58880.1\n58880.1\n58880.11\n58880.11\n58880.04\n58880.02\n58880.04\n58800.0\n58800.0\n58880.11\n58880.1\n58880.09\n58880.08\n58880.07\n58880.06\n58880.05\n58880.04\n58879.95\n58879.96\n58879.97\n58879.98\n58879.99\n58880.0\n58880.01\n58880.02\n58852.13\n58852.13\n58852.12\n58852.12\n58852.11\n58852.11\n58852.1\n58852.1\n58852.09\n58852.09\n58852.08\n58852.08\n58852.07\n58852.07\n58852.06\n58852.06\n58852.15\n58852.15\n58852.16\n58852.16\n58852.17\n58852.17\n58852.18\n58852.18\n58852.19\n58852.19\n58852.2\n58852.2\n58852.21\n58852.21\n58852.22\n58852.22\n58852.15\n58852.22\n58852.21\n58852.2\n58852.19\n58852.18\n58852.17\n58852.16\n58852.15\n58852.06\n58852.07\n58852.08\n58852.09\n58852.1\n58852.11\n58852.12\n58852.13\n58843.06\n58843.06\n58843.05\n58843.05\n58843.04\n58843.04\n58843.03\n58843.03\n58843.02\n58843.02\n58843.01\n58843.01\n58843.0\n58843.0\n58842.99\n58842.99\n58843.08\n58843.08\n58843.09\n58843.09\n58843.1\n58843.1\n58843.11\n58843.11\n58843.12\n58843.12\n58843.13\n58843.13\n58843.14\n58843.14\n58843.15\n58843.15\n" :: String
-d = fmap round (fmap read $ lines s :: [Double]) :: [Integer]
-  
-test3Output :: String
-test3Output = unlines $ plotWithString options' d
 
 ---------------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -154,9 +138,8 @@ testIEX :: IO ()
 testIEX = do
   obj <- getNonJSONData "https://sandbox.iexapis.com/stable/stock/AAPL/quote?token=Tpk_8d1fbeccf06745019a98635b05346b90"
   let obj'        = fromJust ( fromMaybe mempty $ decode ((\(Right x)->x) obj) :: Maybe Object)
-      latestPrice = parse ((.:) obj') (pack "latestPrice") :: Result Double
-      -- latestPrice1 = (\ (Success x) -> x ) (parse ((.:) obj') (pack "latestPrice") :: Result Double) :: Double
-      symbol      = parse ((.:) obj') (pack "symbol")      :: Result String
+      latestPrice = parse (obj' .:) (pack "latestPrice") :: Result Double
+      symbol      = parse (obj' .:) (pack "symbol")      :: Result String
 
   let symbol' =
         case symbol of
@@ -167,7 +150,7 @@ testIEX = do
           Success x -> x
           Error   _ -> (-1)
 
-  putStrLn $ symbol' ++ " : " ++ (show latestPrice')
+  putStrLn $ symbol' ++ " : " ++ show latestPrice'
   return ()
 
 -- TODO : do similar to CoinbasePro logPrice
@@ -188,7 +171,7 @@ test0Output = tail [r|
 3.00 ┤ ╭╯     ╰╮
 2.00 ┤╭╯       ╰╮
 1.00 ┼╯         ╰
-|]  
+|]
 
 test1Output :: String
 test1Output = tail [r|
@@ -227,14 +210,14 @@ drawUI s l = [ui]
               Nothing -> str "-"
               Just i -> str $ (listElements l)Vec.!i --str (show (i + 1))
         -- total = str $ show $ Vec.length $ l^.(L.listElementsL)
-        sel
-          = case l^.(L.listSelectedL) of
-              Nothing -> 0
-              Just i  -> i
-        fs =
-          [ test1Output
-          , test2Output
-          , test3Output]
+        -- sel
+        --   = case l^.(L.listSelectedL) of
+        --       Nothing -> 0
+        --       Just i  -> i
+        -- fs =
+        --   [ test1Output
+        --   , test2Output
+        --   , test3Output]
         graph
           = B.borderWithLabel lbl $
             hLimit 80 $
@@ -261,11 +244,11 @@ appEvent l (T.VtyEvent e) =
     case e of
         V.EvKey (V.KChar '+') [] ->
             let el = nextElement (L.listElements l)
-                pos = Vec.length $ l^.(L.listElementsL)
+                pos = Vec.length $ l^.L.listElementsL
             in M.continue $ L.listInsert pos el l
 
         V.EvKey (V.KChar '-') [] ->
-            case l^.(L.listSelectedL) of
+            case l^.L.listSelectedL of
                 Nothing -> M.continue l
                 Just i -> M.continue $ L.listRemove i l
 
@@ -275,7 +258,7 @@ appEvent l (T.VtyEvent e) =
     where
 
       nextElement :: Vec.Vector String -> String
-      nextElement v = fromMaybe "?" $ Vec.find (flip Vec.notElem v) (Vec.fromList ["sin", "cos", "tan", "ctan", "atan"])
+      nextElement v = fromMaybe "?" $ Vec.find (`Vec.notElem` v) (Vec.fromList ["sin", "cos", "tan", "ctan", "atan"])
 appEvent l _ = M.continue l
 
 listDrawElement :: (Show a) => Bool -> a -> Widget ()
@@ -283,7 +266,7 @@ listDrawElement sel a =
     let selStr s = if sel
                    then withAttr customAttr (str $ "<" <> s <> ">")
                    else str s
-    in C.hCenter $ str "Item " <+> (selStr $ show a)
+    in C.hCenter $ str "Item " <+> selStr (show a)
 
 initialState :: L.List () String
 initialState = L.list () (Vec.fromList
