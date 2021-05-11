@@ -50,6 +50,7 @@ trades prid = API.trades prid userAgent
 
 
 -- | https://docs.pro.coinbase.com/#get-historic-rates
+-- https://api.pro.coinbase.com/products/BTC-USD/candles?start=2018-07-10T12:00:00&stop=2018-07-15T12:00:00&granularity=900
 candles :: ProductId -> Maybe UTCTime -> Maybe UTCTime -> CandleGranularity -> ClientM [Candle]
 candles prid start end cg = API.candles prid start end cg userAgent
 

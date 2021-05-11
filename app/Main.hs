@@ -39,7 +39,7 @@ import System.Directory
 import Data.List                            as DL
 import qualified System.IO.Streams                 as Streams
 import           Net.CoinbasePro.Environment       (Environment (..))
-import Net.CoinbasePro.Types ( ProductId(..), Price(..) )
+import           Net.CoinbasePro.Types ( ProductId(..), Price(..), CandleGranularity(..) )
 import           Net.CoinbasePro.WebSocketFeed         (subscribeToFeed)
 import           Net.CoinbasePro.WebSocketFeed.Request (ChannelName (..))
 import           Net.CoinbasePro.WebSocketFeed.Channel (ChannelMessage (..))
@@ -47,6 +47,13 @@ import           Net.CoinbasePro.WebSocketFeed.Channel.Full.Match    as M
 import           Net.CoinbasePro.WebSocketFeed.Channel.Full.Open     as O
 import           Net.CoinbasePro.WebSocketFeed.Channel.Full.Done     as D
 import           Net.CoinbasePro.WebSocketFeed.Channel.Full.Received as R
+
+import           Net.CoinbasePro.Unauthenticated
+import           Net.CoinbasePro.Request
+import           Net.CoinbasePro.Environment
+import           Net.CoinbasePro.Types
+
+import Data.Time.Clock
 
 import Data.Text.Chart as C
 
@@ -97,12 +104,27 @@ options' :: C.Options
 options' =
   C.Options { height = 14 }
 
-graphPrice :: IO String
-graphPrice = do
+graphString :: IO String
+graphString = do
   s <- S.readFile logFile
   let d = DL.reverse . take 80 . DL.reverse $ fmap round (read <$> lines s :: [Double]) :: [Integer]
       result = unlines $ plotWithString options' d
   return result
+
+graphString' :: IO String
+graphString' = do
+  --let d = DL.reverse . take 80 . DL.reverse $ fmap round (read <$> lines s :: [Double]) :: [Integer]
+  let d = candles (ProductId $ pack "BTC-USD") (Just fromDate) (Just toDate) Day
+  cs <- run Sandbox d
+  let ps = (round  . unPrice . low <$> cs) :: [Integer]
+      result = unlines $ plotWithString options' ps
+  return result
+  
+
+testCBP :: IO ()
+testCBP = do
+  msgs <- subscribeToFeed [ProductId "BTC-USD"] [Full] Sandbox Nothing
+  forever $ Streams.read msgs >>= readPrice >>= logPrice >> graphString >>= (\s ->  M.defaultMain (theApp s) initialState)
 
 ---------------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -158,6 +180,7 @@ logPriceIEX :: IO ()
 logPriceIEX = undefined
 
 ---------------------------------------------------------------------------------------------------------------------------------------------------------------
+
 
 fromJust :: Monoid a => Maybe a -> a
 fromJust (Just x) = x
@@ -295,12 +318,31 @@ theApp s =
           , M.appAttrMap = const theMap
           }
 
+fromDate = (read "2021-01-01 00:00:00 UTC")::UTCTime
+toDate =   (read "2021-03-01 00:00:00 UTC")::UTCTime
+
 main :: IO ()
 main = do
-  --s <- graphPrice
+  --s <- graphString
   --let s' = 
   --void $ M.defaultMain (theApp s) initialState
-  --void $ logPriceCB >> graphPrice >>= (\s ->  M.defaultMain (theApp s) initialState)
+  --void $ logPriceCB >> graphString >>= (\s ->  M.defaultMain (theApp s) initialState)
   msgs <- subscribeToFeed [ProductId "BTC-USD"] [Full] Sandbox Nothing
-  forever $ Streams.read msgs >>= readPrice >>= logPrice >> graphPrice >>= (\s ->  M.defaultMain (theApp s) initialState)
+  --forever $ Streams.read msgs >>= readPrice >>= logPrice >> graphString >>= (\s ->  M.defaultMain (theApp s) initialState)
+  void $ Streams.read msgs >>= readPrice >>= logPrice >> graphString' >>= (\s ->  M.defaultMain (theApp s) initialState)
+  --void $ graphString >>= (\s ->  M.defaultMain (theApp s) initialState)
+  
+  -- let d = candles (ProductId $ pack "BTC-USD") (Just fromDate) (Just toDate) Day
+  -- cs <- run Sandbox d
+  -- let ps = high <$> cs
+  -- void $ (return (concat $ show . unPrice <$> ps)) >>= (\s ->  M.defaultMain (theApp s) initialState)
+  
   --forever $ M.defaultMain theApp initialState
+  -- now <- getCurrentTime
+  -- (read "2011-11-19 18:28:r52.607875 UTC")::UTCTime :: UTCTime
+  -- :t candles (ProductId $ pack "BTC-USD")
+  -- (read "2011-11-19 18:28:r52.607875 UTC")::UTCTime
+  -- fromDate = (read "2021-01-01 00:00:r0.0 UTC")::UTCTime
+  -- toDate = (read "2021-02-01 00:00:r0.0 UTC")::UTCTime
+  -- d = candles (ProductId $ pack "BTC-USD") (Just fromDate) (Just toDate) Day
+  -- cs <- run Sandbox d - get candles for 32 days
