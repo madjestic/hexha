@@ -10,14 +10,15 @@ import qualified Graphics.Vty as V
 import Brick ( App(..)
              , withBorderStyle
              , padRight, padLeft, padTop, padAll, Padding(..))
-import qualified Brick.Main as M
+import qualified Brick.BChan as BC       
+import qualified Brick.Main  as M
 import qualified Brick.Types as T
-import qualified Brick.Widgets.Border as B
+import qualified Brick.Widgets.Border       as B
 import qualified Brick.Widgets.Border.Style as BS
-import Brick.Widgets.List as L
+import Brick.Widgets.List             as L
 import qualified Brick.Widgets.Center as C
-import qualified Brick.AttrMap as A
-import qualified Data.Vector as Vec
+import qualified Brick.AttrMap        as A
+import qualified Data.Vector          as Vec
 import Brick.Types ( Widget )
 import Brick.Widgets.Core ( (<+>), str, vLimit, hLimit, vBox, withAttr )
 import Brick.Util (fg, on)
@@ -54,7 +55,7 @@ import           Net.CoinbasePro.Environment
 import           Net.CoinbasePro.Types
 
 import Data.Time.Clock
-
+import Control.Concurrent
 import Data.Text.Chart as C
 
 import Debug.Trace    as DT
@@ -262,6 +263,54 @@ drawUI s l = [ui]
                               , C.hCenter $ str "Press Esc to exit."
                               ]
 
+newtype LogEvent = Log [String]
+
+-- TODO: attempting writing a logger event
+logEvent :: s -> T.BrickEvent n LogEvent -> T.EventM n (T.Next s)
+logEvent s (T.AppEvent (Log ls)) = undefined
+
+logThread :: BC.BChan LogEvent -> IO ()
+logThread chan = do
+  ls <- return ["suka1", "nah"]
+  threadDelay 1000000
+  BC.writeBChan chan $ Log ls
+
+-- testEager :: IO String
+-- testEager = do
+--   handle   <- openFile logFile ReadMode
+--   h <- openFile logFile ReadMode
+--   c <- System.IO.hGetContents h
+--   seq c ()
+--   hClose h
+--   return c
+
+--handleEvent :: AppState -> T.BrickEvent n LogEvent -> T.EventM n (T.Next AppState)
+handleEvent :: AppState -> T.BrickEvent () LogEvent -> T.EventM () (T.Next AppState)
+handleEvent s (T.AppEvent (Log l)) =
+  M.continue $ L.list () (Vec.fromList l) 1
+handleEvent l (T.VtyEvent e) =
+  case e of
+    V.EvKey (V.KChar '+') [] ->
+      let el  = nextElement (L.listElements l)
+          pos = Vec.length $ l^.L.listElementsL
+      in M.continue $ L.listInsert pos el l
+
+    V.EvKey (V.KChar '-') [] ->
+      case l^.L.listSelectedL of
+        Nothing -> M.continue l
+        Just i -> M.continue $ L.listRemove i l
+
+    V.EvKey V.KEsc [] -> M.halt l
+
+    ev -> M.continue =<< L.handleListEvent ev l
+    where
+
+      nextElement :: Vec.Vector String -> String
+      nextElement v = fromMaybe "?" $ Vec.find (`Vec.notElem` v) (Vec.fromList ["sin", "cos", "tan", "ctan", "atan"])
+
+handleEvent s _ =
+  M.continue s
+
 appEvent :: L.List () String -> T.BrickEvent () e -> T.EventM () (T.Next (L.List () String))
 appEvent l (T.VtyEvent e) =
     case e of
@@ -309,11 +358,15 @@ theMap = A.attrMap V.defAttr
     , (customAttr,            fg V.cyan)
     ]
 
-theApp :: String -> M.App (L.List () String) e ()
+type AppState = (L.List () String)
+
+--theApp :: String -> M.App (L.List () String) e ()
+theApp :: String -> M.App AppState LogEvent ()
 theApp s =
     M.App { M.appDraw = drawUI s
           , M.appChooseCursor = M.showFirstCursor
-          , M.appHandleEvent = appEvent
+          --, M.appHandleEvent = appEvent
+          , M.appHandleEvent = handleEvent
           , M.appStartEvent = return
           , M.appAttrMap = const theMap
           }
@@ -321,28 +374,36 @@ theApp s =
 fromDate = (read "2021-01-01 00:00:00 UTC")::UTCTime
 toDate =   (read "2021-03-01 00:00:00 UTC")::UTCTime
 
+main' :: IO ()
+main' = do
+  msgs <- subscribeToFeed [ProductId "BTC-USD"] [Full] Sandbox Nothing
+  forever $ do
+    threadDelay 1000000
+    Streams.read msgs >>= readPrice >>= logPrice
+    graphString >>= (\s ->  M.defaultMain (theApp s) initialState)
+    putStrLn "Hi!"
+  -- msgs <- subscribeToFeed [ProductId "BTC-USD"] [Full] Sandbox Nothing
+  -- forever $ Streams.read msgs >>= readPrice >>= logPrice >> graphString >>= (\s ->  M.defaultMain (theApp s) initialState) >> threadDelay 100
+
+main1 :: IO ()
+main1 = do
+  msgs <- subscribeToFeed [ProductId "BTC-USD"] [Full] Sandbox Nothing
+  forever $ Streams.read msgs >>= readPrice >>= logPrice >> graphString >>= (\s ->  M.defaultMain (theApp s) initialState)
+
+main2 :: IO ()
+main2 = do
+  msgs <- subscribeToFeed [ProductId "BTC-USD"] [Full] Sandbox Nothing
+  void $ Streams.read msgs >>= readPrice >>= logPrice >> graphString' >>= (\s ->  M.defaultMain (theApp s) initialState)
+
 main :: IO ()
 main = do
-  --s <- graphString
-  --let s' = 
-  --void $ M.defaultMain (theApp s) initialState
-  --void $ logPriceCB >> graphString >>= (\s ->  M.defaultMain (theApp s) initialState)
-  msgs <- subscribeToFeed [ProductId "BTC-USD"] [Full] Sandbox Nothing
-  --forever $ Streams.read msgs >>= readPrice >>= logPrice >> graphString >>= (\s ->  M.defaultMain (theApp s) initialState)
-  void $ Streams.read msgs >>= readPrice >>= logPrice >> graphString' >>= (\s ->  M.defaultMain (theApp s) initialState)
-  --void $ graphString >>= (\s ->  M.defaultMain (theApp s) initialState)
+  eventChan  <- BC.newBChan 10
+  forkIO $ forever $ do
+    logThread eventChan
   
-  -- let d = candles (ProductId $ pack "BTC-USD") (Just fromDate) (Just toDate) Day
-  -- cs <- run Sandbox d
-  -- let ps = high <$> cs
-  -- void $ (return (concat $ show . unPrice <$> ps)) >>= (\s ->  M.defaultMain (theApp s) initialState)
-  
-  --forever $ M.defaultMain theApp initialState
-  -- now <- getCurrentTime
-  -- (read "2011-11-19 18:28:r52.607875 UTC")::UTCTime :: UTCTime
-  -- :t candles (ProductId $ pack "BTC-USD")
-  -- (read "2011-11-19 18:28:r52.607875 UTC")::UTCTime
-  -- fromDate = (read "2021-01-01 00:00:r0.0 UTC")::UTCTime
-  -- toDate = (read "2021-02-01 00:00:r0.0 UTC")::UTCTime
-  -- d = candles (ProductId $ pack "BTC-USD") (Just fromDate) (Just toDate) Day
-  -- cs <- run Sandbox d - get candles for 32 days
+  let buildVty = V.mkVty V.defaultConfig
+  initialVty <- buildVty
+  let finalState = M.customMain initialVty buildVty
+                (Just eventChan) (theApp "suka") initialState
+  void finalState
+
