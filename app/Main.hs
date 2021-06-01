@@ -32,8 +32,6 @@ import Control.Exception
 import qualified Data.ByteString.Lazy.Char8 as L8
 import Net.Stocks
 import qualified Net.IEX.TimeSeries         as IEXTimeSeries
--- import Control.Monad.Writer
--- import Control.Monad.State
 import System.IO
 import System.IO.Strict                     as S
 import System.Directory
@@ -189,43 +187,6 @@ fromJust :: Monoid a => Maybe a -> a
 fromJust (Just x) = x
 fromJust Nothing  = mempty
 
-test0Output :: String
-test0Output = tail [r|
-6.00 ┤    ╭─╮
-5.00 ┤   ╭╯ ╰╮
-4.00 ┤  ╭╯   ╰╮
-3.00 ┤ ╭╯     ╰╮
-2.00 ┤╭╯       ╰╮
-1.00 ┼╯         ╰
-|]
-
-test1Output :: String
-test1Output = tail [r|
- 5.00 ┤          ╭────────╮
- 3.75 ┤       ╭──╯        ╰──╮
- 2.50 ┤  ╭────╯              ╰────╮
- 1.25 ┤╭─╯                        ╰─╮
- 0.00 ┼╯                            ╰╮                            ╭
--1.25 ┤                              ╰─╮                        ╭─╯
--2.50 ┤                                ╰────╮              ╭────╯
--3.75 ┤                                     ╰──╮        ╭──╯
--5.00 ┤                                        ╰────────╯
-|]
-
-test2Output :: String
-test2Output = tail [r|
- 5.00 ┤                        ╭────────╮
- 3.75 ┤                     ╭──╯        ╰──╮
- 2.50 ┤                ╭────╯              ╰────╮
- 1.25 ┤              ╭─╯                        ╰─╮
- 0.00 ┼              |                            ╰╮              
--1.25 ┤            ╭─╯                             ╰─╮            
--2.50 ┤       ╭────╯                                 ╰────╮       
--3.75 ┤    ╭──╯                                           ╰──╮    
--5.00 ┤────╯                                                 ╰─────
-|]
-
---drawUI :: (Show a) => L.List () a -> [Widget ()]
 drawUI :: AppState -> [Widget ()]
 drawUI (AppState s l) = [ui]
     where
@@ -299,28 +260,6 @@ handleEvent app@(AppState _ l) (T.VtyEvent e) =
 handleEvent s _ =
   M.continue s
 
-appEvent :: L.List () String -> T.BrickEvent () e -> T.EventM () (T.Next (L.List () String))
-appEvent l (T.VtyEvent e) =
-    case e of
-        V.EvKey (V.KChar '+') [] ->
-            let el = nextElement (L.listElements l)
-                pos = Vec.length $ l^.L.listElementsL
-            in M.continue $ L.listInsert pos el l
-
-        V.EvKey (V.KChar '-') [] ->
-            case l^.L.listSelectedL of
-                Nothing -> M.continue l
-                Just i -> M.continue $ L.listRemove i l
-
-        V.EvKey V.KEsc [] -> M.halt l
-
-        ev -> M.continue =<< L.handleListEvent ev l
-    where
-
-      nextElement :: Vec.Vector String -> String
-      nextElement v = fromMaybe "?" $ Vec.find (`Vec.notElem` v) (Vec.fromList ["sin", "cos", "tan", "ctan", "atan"])
-appEvent l _ = M.continue l
-
 listDrawElement :: (Show a) => Bool -> a -> Widget ()
 listDrawElement sel a =
     let selStr s = str s -- if sel
@@ -364,7 +303,6 @@ theApp :: M.App AppState TickerEvent ()
 theApp =
     M.App { M.appDraw = drawUI
           , M.appChooseCursor = M.showFirstCursor
-          --, M.appHandleEvent = appEvent
           , M.appHandleEvent = handleEvent
           , M.appStartEvent = return
           , M.appAttrMap = const theMap
@@ -378,6 +316,6 @@ main = do
   
   let buildVty = V.mkVty V.defaultConfig
   initialVty <- buildVty
-  let finalState = M.customMain initialVty buildVty
+  let runState = M.customMain initialVty buildVty
                 (Just eventChan) theApp initialState
-  void finalState
+  void runState
