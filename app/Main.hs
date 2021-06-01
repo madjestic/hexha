@@ -125,7 +125,7 @@ graphString' = do
 testCBP :: IO ()
 testCBP = do
   msgs <- subscribeToFeed [ProductId "BTC-USD"] [Full] Sandbox Nothing
-  forever $ Streams.read msgs >>= readPrice >>= logPrice >> graphString >>= (\s ->  M.defaultMain (theApp s) initialState)
+  forever $ Streams.read msgs >>= readPrice >>= logPrice >> graphString >>= (\s ->  M.defaultMain theApp initialState)
 
 ---------------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -224,8 +224,8 @@ test2Output = tail [r|
 |]
 
 --drawUI :: (Show a) => L.List () a -> [Widget ()]
-drawUI :: String -> L.List () String -> [Widget ()]
-drawUI s l = [ui]
+drawUI :: AppState -> [Widget ()]
+drawUI (AppState s l) = [ui]
     where
         --lbl = str "Item " <+> cur <+> str " of " <+> total
         lbl = cur
@@ -252,7 +252,7 @@ drawUI s l = [ui]
 
         box
           = B.borderWithLabel lbl $
-            hLimit 67 $
+            hLimit 69 $
             vLimit 15 $
             L.renderList listDrawElement True l
         ui = C.vCenter $ vBox [
@@ -263,17 +263,19 @@ drawUI s l = [ui]
                               , C.hCenter $ str "Press Esc to exit."
                               ]
 
-newtype LogEvent = Log [String]
+newtype LogEvent = Log String
+-- newtype TickerEvent = Ticker String
 
 -- TODO: attempting writing a logger event
-logEvent :: s -> T.BrickEvent n LogEvent -> T.EventM n (T.Next s)
-logEvent s (T.AppEvent (Log ls)) = undefined
+-- logEvent :: s -> T.BrickEvent n LogEvent -> T.EventM n (T.Next s)
+-- logEvent s (T.AppEvent (Log ls)) = undefined
 
 logThread :: BC.BChan LogEvent -> IO ()
 logThread chan = do
-  ls <- return ["suka1", "nah"]
+  --ls <- return ["suka1", "nah"]
+  s <- graphString'
   threadDelay 1000000
-  BC.writeBChan chan $ Log ls
+  BC.writeBChan chan $ Log s
 
 -- testEager :: IO String
 -- testEager = do
@@ -286,23 +288,24 @@ logThread chan = do
 
 --handleEvent :: AppState -> T.BrickEvent n LogEvent -> T.EventM n (T.Next AppState)
 handleEvent :: AppState -> T.BrickEvent () LogEvent -> T.EventM () (T.Next AppState)
-handleEvent s (T.AppEvent (Log l)) =
-  M.continue $ L.list () (Vec.fromList l) 1
-handleEvent l (T.VtyEvent e) =
+handleEvent app@(AppState s _) (T.AppEvent (Log l)) =
+  M.continue $ app
+  { header = l }
+handleEvent app@(AppState _ l) (T.VtyEvent e) =
   case e of
     V.EvKey (V.KChar '+') [] ->
       let el  = nextElement (L.listElements l)
           pos = Vec.length $ l^.L.listElementsL
-      in M.continue $ L.listInsert pos el l
+      in M.continue $ app { appList = L.listInsert pos el l }
 
     V.EvKey (V.KChar '-') [] ->
       case l^.L.listSelectedL of
-        Nothing -> M.continue l
-        Just i -> M.continue $ L.listRemove i l
+        Nothing -> M.continue $ app { appList = l }
+        Just i  -> M.continue $ app { appList = L.listRemove i l }
 
-    V.EvKey V.KEsc [] -> M.halt l
+    V.EvKey V.KEsc [] -> M.halt $ app { appList = l }
 
-    ev -> M.continue =<< L.handleListEvent ev l
+    ev -> M.continue =<< (\l' -> return app { appList = l'}) =<< L.handleListEvent ev l
     where
 
       nextElement :: Vec.Vector String -> String
@@ -335,35 +338,52 @@ appEvent l _ = M.continue l
 
 listDrawElement :: (Show a) => Bool -> a -> Widget ()
 listDrawElement sel a =
-    let selStr s = if sel
-                   then withAttr customAttr (str $ "<" <> s <> ">")
-                   else str s
+    let selStr s = str s -- if sel
+                   -- then withAttr customAttr (str $ "<" <> s <> ">")
+                   -- else str s
     in C.hCenter $ str "Item " <+> selStr (show a)
 
-initialState :: L.List () String
-initialState = L.list () (Vec.fromList
+customAttr :: A.AttrName
+customAttr = L.listSelectedAttr <> "custom"
+
+sysfg :: V.Color
+sysfg = V.rgbColor 00 99 00
+
+theMap :: A.AttrMap
+theMap = A.attrMap V.defAttr
+    [ (L.listAttr,            sysfg `on` V.black)
+    , (L.listSelectedAttr,    V.black `on` V.green)
+    , (customAttr,            fg V.red)
+    ]
+    -- [ (L.listAttr,            V.white `on` V.black)
+    -- , (L.listSelectedAttr,    V.black `on` V.white)
+    -- , (customAttr,            fg V.red)
+    -- ]
+
+-- type AppState = (L.List () String)
+data AppState =
+     AppState
+     {
+       header  :: String
+     , appList :: (L.List () String)
+     }
+
+initialState :: AppState
+initialState =
+  AppState "initialState" initialList
+
+initialList :: L.List () String
+initialList = L.list () (Vec.fromList
                           [ "Bitcoin"
                           , "Ethereum"
                           , "Litecoin"
                           , "DogeCoin"
                           ]) 1
 
-customAttr :: A.AttrName
-customAttr = L.listSelectedAttr <> "custom"
-
-theMap :: A.AttrMap
-theMap = A.attrMap V.defAttr
-    [ (L.listAttr,            V.white `on` V.blue)
-    , (L.listSelectedAttr,    V.blue `on` V.white)
-    , (customAttr,            fg V.cyan)
-    ]
-
-type AppState = (L.List () String)
-
 --theApp :: String -> M.App (L.List () String) e ()
-theApp :: String -> M.App AppState LogEvent ()
-theApp s =
-    M.App { M.appDraw = drawUI s
+theApp :: M.App AppState LogEvent ()
+theApp =
+    M.App { M.appDraw = drawUI
           , M.appChooseCursor = M.showFirstCursor
           --, M.appHandleEvent = appEvent
           , M.appHandleEvent = handleEvent
@@ -380,7 +400,7 @@ main' = do
   forever $ do
     threadDelay 1000000
     Streams.read msgs >>= readPrice >>= logPrice
-    graphString >>= (\s ->  M.defaultMain (theApp s) initialState)
+    graphString >>= (\s ->  M.defaultMain theApp initialState)
     putStrLn "Hi!"
   -- msgs <- subscribeToFeed [ProductId "BTC-USD"] [Full] Sandbox Nothing
   -- forever $ Streams.read msgs >>= readPrice >>= logPrice >> graphString >>= (\s ->  M.defaultMain (theApp s) initialState) >> threadDelay 100
@@ -388,12 +408,12 @@ main' = do
 main1 :: IO ()
 main1 = do
   msgs <- subscribeToFeed [ProductId "BTC-USD"] [Full] Sandbox Nothing
-  forever $ Streams.read msgs >>= readPrice >>= logPrice >> graphString >>= (\s ->  M.defaultMain (theApp s) initialState)
+  forever $ Streams.read msgs >>= readPrice >>= logPrice >> graphString >>= (\s ->  M.defaultMain theApp initialState)
 
 main2 :: IO ()
 main2 = do
   msgs <- subscribeToFeed [ProductId "BTC-USD"] [Full] Sandbox Nothing
-  void $ Streams.read msgs >>= readPrice >>= logPrice >> graphString' >>= (\s ->  M.defaultMain (theApp s) initialState)
+  void $ Streams.read msgs >>= readPrice >>= logPrice >> graphString' >>= (\s ->  M.defaultMain theApp initialState)
 
 main :: IO ()
 main = do
@@ -404,6 +424,6 @@ main = do
   let buildVty = V.mkVty V.defaultConfig
   initialVty <- buildVty
   let finalState = M.customMain initialVty buildVty
-                (Just eventChan) (theApp "suka") initialState
+                (Just eventChan) theApp initialState
   void finalState
 
