@@ -105,27 +105,29 @@ options' :: C.Options
 options' =
   C.Options { height = 14 }
 
-graphString :: IO String
-graphString = do
+graphLogString :: IO String
+graphLogString = do
   s <- S.readFile logFile
   let d = DL.reverse . take 80 . DL.reverse $ fmap round (read <$> lines s :: [Double]) :: [Integer]
       result = unlines $ plotWithString options' d
   return result
 
-graphString' :: IO String
-graphString' = do
+graphQueryString :: IO String
+graphQueryString = do
   --let d = DL.reverse . take 80 . DL.reverse $ fmap round (read <$> lines s :: [Double]) :: [Integer]
   let d = candles (ProductId $ pack "BTC-USD") (Just fromDate) (Just toDate) Day
   cs <- run Sandbox d
   let ps = (round  . unPrice . low <$> cs) :: [Integer]
       result = unlines $ plotWithString options' ps
   return result
-  
+
+fromDate = (read "2021-01-01 00:00:00 UTC")::UTCTime
+toDate =   (read "2021-03-01 00:00:00 UTC")::UTCTime
 
 testCBP :: IO ()
 testCBP = do
   msgs <- subscribeToFeed [ProductId "BTC-USD"] [Full] Sandbox Nothing
-  forever $ Streams.read msgs >>= readPrice >>= logPrice >> graphString >>= (\s ->  M.defaultMain theApp initialState)
+  forever $ Streams.read msgs >>= readPrice >>= logPrice >> graphLogString >>= (\s ->  M.defaultMain theApp initialState)
 
 ---------------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -246,8 +248,6 @@ drawUI (AppState s l) = [ui]
           = B.borderWithLabel lbl $
             hLimit 80 $
             vLimit 15 $
-            --str test1Output
-            --str $ fs!!(sel `mod` length fs)
             str s
 
         box
@@ -263,32 +263,17 @@ drawUI (AppState s l) = [ui]
                               , C.hCenter $ str "Press Esc to exit."
                               ]
 
-newtype LogEvent = Log String
--- newtype TickerEvent = Ticker String
+newtype TickerEvent = Ticker String
 
--- TODO: attempting writing a logger event
--- logEvent :: s -> T.BrickEvent n LogEvent -> T.EventM n (T.Next s)
--- logEvent s (T.AppEvent (Log ls)) = undefined
-
-logThread :: BC.BChan LogEvent -> IO ()
-logThread chan = do
+tickerThread :: BC.BChan TickerEvent -> IO ()
+tickerThread chan = do
   --ls <- return ["suka1", "nah"]
-  s <- graphString'
+  s <- graphQueryString
   threadDelay 1000000
-  BC.writeBChan chan $ Log s
+  BC.writeBChan chan $ Main.Ticker s
 
--- testEager :: IO String
--- testEager = do
---   handle   <- openFile logFile ReadMode
---   h <- openFile logFile ReadMode
---   c <- System.IO.hGetContents h
---   seq c ()
---   hClose h
---   return c
-
---handleEvent :: AppState -> T.BrickEvent n LogEvent -> T.EventM n (T.Next AppState)
-handleEvent :: AppState -> T.BrickEvent () LogEvent -> T.EventM () (T.Next AppState)
-handleEvent app@(AppState s _) (T.AppEvent (Log l)) =
+handleEvent :: AppState -> T.BrickEvent () TickerEvent -> T.EventM () (T.Next AppState)
+handleEvent app@(AppState s _) (T.AppEvent (Main.Ticker l)) =
   M.continue $ app
   { header = l }
 handleEvent app@(AppState _ l) (T.VtyEvent e) =
@@ -351,16 +336,11 @@ sysfg = V.rgbColor 00 99 00
 
 theMap :: A.AttrMap
 theMap = A.attrMap V.defAttr
-    [ (L.listAttr,            sysfg `on` V.black)
+    [ (L.listAttr,            V.green `on` V.black)
     , (L.listSelectedAttr,    V.black `on` V.green)
     , (customAttr,            fg V.red)
     ]
-    -- [ (L.listAttr,            V.white `on` V.black)
-    -- , (L.listSelectedAttr,    V.black `on` V.white)
-    -- , (customAttr,            fg V.red)
-    -- ]
 
--- type AppState = (L.List () String)
 data AppState =
      AppState
      {
@@ -380,8 +360,7 @@ initialList = L.list () (Vec.fromList
                           , "DogeCoin"
                           ]) 1
 
---theApp :: String -> M.App (L.List () String) e ()
-theApp :: M.App AppState LogEvent ()
+theApp :: M.App AppState TickerEvent ()
 theApp =
     M.App { M.appDraw = drawUI
           , M.appChooseCursor = M.showFirstCursor
@@ -391,39 +370,14 @@ theApp =
           , M.appAttrMap = const theMap
           }
 
-fromDate = (read "2021-01-01 00:00:00 UTC")::UTCTime
-toDate =   (read "2021-03-01 00:00:00 UTC")::UTCTime
-
-main' :: IO ()
-main' = do
-  msgs <- subscribeToFeed [ProductId "BTC-USD"] [Full] Sandbox Nothing
-  forever $ do
-    threadDelay 1000000
-    Streams.read msgs >>= readPrice >>= logPrice
-    graphString >>= (\s ->  M.defaultMain theApp initialState)
-    putStrLn "Hi!"
-  -- msgs <- subscribeToFeed [ProductId "BTC-USD"] [Full] Sandbox Nothing
-  -- forever $ Streams.read msgs >>= readPrice >>= logPrice >> graphString >>= (\s ->  M.defaultMain (theApp s) initialState) >> threadDelay 100
-
-main1 :: IO ()
-main1 = do
-  msgs <- subscribeToFeed [ProductId "BTC-USD"] [Full] Sandbox Nothing
-  forever $ Streams.read msgs >>= readPrice >>= logPrice >> graphString >>= (\s ->  M.defaultMain theApp initialState)
-
-main2 :: IO ()
-main2 = do
-  msgs <- subscribeToFeed [ProductId "BTC-USD"] [Full] Sandbox Nothing
-  void $ Streams.read msgs >>= readPrice >>= logPrice >> graphString' >>= (\s ->  M.defaultMain theApp initialState)
-
 main :: IO ()
 main = do
   eventChan  <- BC.newBChan 10
   forkIO $ forever $ do
-    logThread eventChan
+    tickerThread eventChan
   
   let buildVty = V.mkVty V.defaultConfig
   initialVty <- buildVty
   let finalState = M.customMain initialVty buildVty
                 (Just eventChan) theApp initialState
   void finalState
-
