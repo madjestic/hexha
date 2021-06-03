@@ -4,7 +4,8 @@
 module Main where
 
 import Lens.Micro ((^.))
-import Control.Monad ( void, forever )
+import Control.Monad ( void, forever)
+import Control.Monad.IO.Class (liftIO)
 import Data.Maybe (fromMaybe)
 import qualified Graphics.Vty as V
 import Brick ( App(..)
@@ -34,6 +35,7 @@ import Net.Stocks
 import qualified Net.IEX.TimeSeries         as IEXTimeSeries
 import System.IO
 import System.IO.Strict                     as S
+import System.IO.Unsafe (unsafePerformIO)
 import System.Directory
 import Data.List                            as DL
 import qualified System.IO.Streams                 as Streams
@@ -112,15 +114,26 @@ graphLogString = do
 
 graphQueryString :: IO String
 graphQueryString = do
-  --let d = DL.reverse . take 80 . DL.reverse $ fmap round (read <$> lines s :: [Double]) :: [Integer]
   let d = candles (ProductId $ pack "BTC-USD") (Just fromDate) (Just toDate) Day
   cs <- run Sandbox d
   let ps = (round  . unPrice . low <$> cs) :: [Integer]
       result = unlines $ plotWithString options' ps
   return result
 
-fromDate = (read "2021-01-01 00:00:00 UTC")::UTCTime
-toDate =   (read "2021-03-01 00:00:00 UTC")::UTCTime
+graphQueryString' :: String -> IO String
+graphQueryString' s = do
+  let d = candles (ProductId $ pack s) (Just fromDate) (Just toDate) Day
+  cs <- run Sandbox d
+  let ps = (round  . unPrice . low <$> cs) :: [Integer]
+      result = unlines $ plotWithString options' ps
+  return result
+  
+
+fromDate :: UTCTime
+fromDate = read "2021-01-01 00:00:00 UTC"
+
+toDate :: UTCTime
+toDate =   read "2021-03-01 00:00:00 UTC"
 
 testCBP :: IO ()
 testCBP = do
@@ -181,12 +194,13 @@ logPriceIEX :: IO ()
 logPriceIEX = undefined
 
 ---------------------------------------------------------------------------------------------------------------------------------------------------------------
-
-
+-- Utils
 fromJust :: Monoid a => Maybe a -> a
 fromJust (Just x) = x
 fromJust Nothing  = mempty
 
+---------------------------------------------------------------------------------------------------------------------------------------------------------------
+-- Brick Logic
 drawUI :: AppState -> [Widget ()]
 drawUI (AppState s l) = [ui]
     where
@@ -224,19 +238,36 @@ drawUI (AppState s l) = [ui]
                               , C.hCenter $ str "Press Esc to exit."
                               ]
 
-newtype TickerEvent = Ticker String
+newtype Ticker = Ticker String
 
-tickerThread :: BC.BChan TickerEvent -> IO ()
-tickerThread chan = do
-  --ls <- return ["suka1", "nah"]
-  s <- graphQueryString
+data Ticker' =
+  Ticker'
+  { command :: MVar TickerCommand
+  , msg     :: String }
+
+data TickerCommand = Message String deriving Show
+
+ticker :: BC.BChan Ticker' -> IO ()
+ticker chan = do
+  t  <- BC.readBChan chan
+  BC.writeBChan chan t
+
+  msg' <- graphQueryString
+  putStrLn "Hello, ticker"
+  -- putStrLn $ msg t
+  (Message tc) <- readMVar (command t)
+  putStrLn $ tc
   threadDelay 1000000
-  BC.writeBChan chan $ Main.Ticker s
+  BC.writeBChan chan $ Ticker' (command t) msg'
 
-handleEvent :: AppState -> T.BrickEvent () TickerEvent -> T.EventM () (T.Next AppState)
-handleEvent app@(AppState s _) (T.AppEvent (Main.Ticker l)) =
-  M.continue $ app
-  { header = l }
+handleEvent :: AppState -> T.BrickEvent () Ticker' -> T.EventM () (T.Next AppState)
+handleEvent app@(AppState s l) (T.AppEvent (Ticker' cmd m)) =
+  do
+    --liftIO $ putStrLn "Sukanah" -- TODO: use that
+    --liftIO $ readMVar cmd
+    liftIO $ swapMVar cmd (Message "BTC-USD")
+    M.continue $ app
+      { header = m }
 handleEvent app@(AppState _ l) (T.VtyEvent e) =
   case e of
     V.EvKey (V.KChar '+') [] ->
@@ -250,7 +281,6 @@ handleEvent app@(AppState _ l) (T.VtyEvent e) =
         Just i  -> M.continue $ app { appList = L.listRemove i l }
 
     V.EvKey V.KEsc [] -> M.halt $ app { appList = l }
-
     ev -> M.continue =<< (\l' -> return app { appList = l'}) =<< L.handleListEvent ev l
     where
 
@@ -259,6 +289,7 @@ handleEvent app@(AppState _ l) (T.VtyEvent e) =
 
 handleEvent s _ =
   M.continue s
+  
 
 listDrawElement :: (Show a) => Bool -> a -> Widget ()
 listDrawElement sel a =
@@ -299,7 +330,7 @@ initialList = L.list () (Vec.fromList
                           , "DogeCoin"
                           ]) 1
 
-theApp :: M.App AppState TickerEvent ()
+theApp :: M.App AppState Ticker' ()
 theApp =
     M.App { M.appDraw = drawUI
           , M.appChooseCursor = M.showFirstCursor
@@ -311,11 +342,14 @@ theApp =
 main :: IO ()
 main = do
   eventChan  <- BC.newBChan 10
-  forkIO $ forever $ do
-    tickerThread eventChan
+  forkIO $ do
+    cmd <- newEmptyMVar
+    putMVar cmd (Message "Blad'")
+    BC.writeBChan eventChan $ Ticker' cmd "Ebanashko"
+    forever $ ticker eventChan
   
   let buildVty = V.mkVty V.defaultConfig
   initialVty <- buildVty
   let runState = M.customMain initialVty buildVty
-                (Just eventChan) theApp initialState
+                 (Just eventChan) theApp initialState
   void runState
