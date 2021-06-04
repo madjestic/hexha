@@ -1,3 +1,3 @@
 # hexha
-[work in progress](https://www.youtube.com/watch?v=-Pj0AP6yhyk)
+[work in progress](https://youtu.be/tfzSE2VuUMo)
 ~~like ponzi2~~ like cointop, but in haskell
