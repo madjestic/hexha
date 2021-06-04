@@ -112,23 +112,22 @@ graphLogString = do
       result = unlines $ plotWithString options' d
   return result
 
-graphQueryString :: IO String
-graphQueryString = do
+graphQueryString' :: IO String
+graphQueryString' = do
   let d = candles (ProductId $ pack "BTC-USD") (Just fromDate) (Just toDate) Day
   cs <- run Sandbox d
   let ps = (round  . unPrice . low <$> cs) :: [Integer]
       result = unlines $ plotWithString options' ps
   return result
 
-graphQueryString' :: String -> IO String
-graphQueryString' s = do
+graphQueryString :: TickerCommand -> IO String
+graphQueryString (Message s) = do
   let d = candles (ProductId $ pack s) (Just fromDate) (Just toDate) Day
   cs <- run Sandbox d
   let ps = (round  . unPrice . low <$> cs) :: [Integer]
       result = unlines $ plotWithString options' ps
   return result
   
-
 fromDate :: UTCTime
 fromDate = read "2021-01-01 00:00:00 UTC"
 
@@ -251,21 +250,15 @@ ticker :: BC.BChan Ticker' -> IO ()
 ticker chan = do
   t  <- BC.readBChan chan
   BC.writeBChan chan t
-
-  msg' <- graphQueryString
-  putStrLn "Hello, ticker"
-  -- putStrLn $ msg t
-  (Message tc) <- readMVar (command t)
-  putStrLn $ tc
+  msg' <- graphQueryString =<< readMVar (command t)
   threadDelay 1000000
   BC.writeBChan chan $ Ticker' (command t) msg'
 
 handleEvent :: AppState -> T.BrickEvent () Ticker' -> T.EventM () (T.Next AppState)
 handleEvent app@(AppState s l) (T.AppEvent (Ticker' cmd m)) =
   do
-    --liftIO $ putStrLn "Sukanah" -- TODO: use that
-    --liftIO $ readMVar cmd
-    liftIO $ swapMVar cmd (Message "BTC-USD")
+    let cs = fromMaybe (0, "BTC-USD") (listSelectedElement l)
+    liftIO $ swapMVar cmd (Message (snd cs))
     M.continue $ app
       { header = m }
 handleEvent app@(AppState _ l) (T.VtyEvent e) =
@@ -285,7 +278,14 @@ handleEvent app@(AppState _ l) (T.VtyEvent e) =
     where
 
       nextElement :: Vec.Vector String -> String
-      nextElement v = fromMaybe "?" $ Vec.find (`Vec.notElem` v) (Vec.fromList ["sin", "cos", "tan", "ctan", "atan"])
+      nextElement v = fromMaybe "?" $ Vec.find (`Vec.notElem` v)
+                      (Vec.fromList
+                       [ -- supported assets
+                         "BTC-USD"
+                       , "BTC-EUR"
+                       , "ETH-USD"
+                       , "LTC-USD"
+                       ])
 
 handleEvent s _ =
   M.continue s
@@ -324,10 +324,8 @@ initialState =
 
 initialList :: L.List () String
 initialList = L.list () (Vec.fromList
-                          [ "Bitcoin"
-                          , "Ethereum"
-                          , "Litecoin"
-                          , "DogeCoin"
+                          [ "BTC-USD"
+                          , "BTC-EUR"
                           ]) 1
 
 theApp :: M.App AppState Ticker' ()
@@ -344,8 +342,8 @@ main = do
   eventChan  <- BC.newBChan 10
   forkIO $ do
     cmd <- newEmptyMVar
-    putMVar cmd (Message "Blad'")
-    BC.writeBChan eventChan $ Ticker' cmd "Ebanashko"
+    putMVar cmd (Message "BTC-USD")
+    BC.writeBChan eventChan $ Ticker' cmd "Loading data..."
     forever $ ticker eventChan
   
   let buildVty = V.mkVty V.defaultConfig
